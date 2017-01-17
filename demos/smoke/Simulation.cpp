@@ -283,7 +283,7 @@ Simulation::Simulation(int object_count)
     : random_dev_()
 {
     MeshPicker mesh;
-    ColorPicker color(random_dev_());
+    ColorPicker color(rand()); //random_dev_());
 
     objects_.reserve(object_count);
     for (int i = 0; i < object_count; i++) {
@@ -292,7 +292,7 @@ Simulation::Simulation(int object_count)
 
         objects_.emplace_back(Object{
             type, glm::vec3(0.5f + 0.5f * (float)i / object_count),
-            color.pick(), Animation(random_dev_(), scale), Path(random_dev_()),
+            color.pick(), Animation(rand() /* random_dev_()*/, scale), Path(rand()/*random_dev_()*/),
         });
     }
 }

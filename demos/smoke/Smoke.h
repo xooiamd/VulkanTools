@@ -133,6 +133,8 @@ private:
     void create_fences();
     void create_command_buffers();
     void create_buffers();
+    static void mapmemory_and_loop(Smoke *smoke, int tnum, VkDevice vkdev);
+    void create_crazy_memory();
     void create_buffer_memory();
     void create_descriptor_sets();
 

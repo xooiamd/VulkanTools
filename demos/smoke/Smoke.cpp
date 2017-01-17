@@ -478,6 +478,74 @@ void Smoke::create_buffers()
         vk::assert_success(vk::CreateBuffer(dev_, &buf_info, nullptr, &data.buf));
 }
 
+#include <unistd.h>
+void Smoke::mapmemory_and_loop(Smoke *smoke, int tnum, VkDevice vkdev)
+{
+   printf("Thread started, smokeptr=%p tnum=%d %p\n", smoke,tnum,vkdev);
+
+#if 1
+    VkMemoryRequirements mem_reqs;
+    vk::GetBufferMemoryRequirements(vkdev, smoke->frame_data_[0].buf, &mem_reqs);
+
+    smoke->frame_data_aligned_size_ = mem_reqs.size;
+    if (smoke->frame_data_aligned_size_ % mem_reqs.alignment)
+        smoke->frame_data_aligned_size_ += mem_reqs.alignment - 
+        (smoke->frame_data_aligned_size_ % mem_reqs.alignment);
+
+    // allocate memory
+    VkMemoryAllocateInfo mem_info = {};
+    mem_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    mem_info.allocationSize = smoke->frame_data_aligned_size_ * (smoke->frame_data_.size() - 1) +
+        mem_reqs.size;
+    mem_info.allocationSize *= 36;
+
+    for (uint32_t idx = 0; idx < smoke->mem_flags_.size(); idx++) {
+        if ((mem_reqs.memoryTypeBits & (1 << idx)) &&
+            (smoke->mem_flags_[idx] & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) &&
+            (smoke->mem_flags_[idx] & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+        {
+            mem_info.memoryTypeIndex = idx;
+            break;
+        }
+    }
+
+    VkDeviceMemory fdm;
+    //printf("Thread: vkAllocateMemory, size=%ld\n", mem_info.allocationSize);
+    vk::AllocateMemory(vkdev, &mem_info, nullptr, &fdm);
+
+    void *memptr;
+    VkDeviceSize bsize = mem_info.allocationSize;
+    vk::MapMemory(vkdev, fdm, 0, VK_WHOLE_SIZE, 0, &memptr);
+    //pause();
+#endif
+
+    while (1)
+    {
+        //printf("Thread sleeping %d\n", tnum);
+        sleep(1);
+        if (getenv("M"))
+        {
+            //printf("Thread modifying mem %d\n", tnum);
+            unsigned char *p = (unsigned char *)memptr;
+            for (VkDeviceSize idx=0; idx<bsize; idx+=4096)
+                p[idx] = p[idx] + 1;
+        }
+    }
+
+}
+
+void Smoke::create_crazy_memory()
+{
+   #define NT 4
+   std::thread t[NT];
+   for (int i=0; i<NT; i++)
+   {
+       t[i]=std::thread(Smoke::mapmemory_and_loop, this, i, dev_);
+       t[i].detach();
+       sleep(1);
+   }
+}
+
 void Smoke::create_buffer_memory()
 {
     VkMemoryRequirements mem_reqs;
@@ -515,6 +583,8 @@ void Smoke::create_buffer_memory()
         data.base = reinterpret_cast<uint8_t *>(ptr) + offset;
         offset += frame_data_aligned_size_;
     }
+
+    create_crazy_memory();
 }
 
 void Smoke::create_descriptor_sets()
