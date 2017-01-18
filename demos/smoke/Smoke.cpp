@@ -523,7 +523,7 @@ void Smoke::mapmemory_and_loop(Smoke *smoke, int tnum, VkDevice vkdev)
     {
         //printf("Thread sleeping %d\n", tnum);
         sleep(1);
-        if (getenv("M"))
+        if (!getenv("M"))
         {
             //printf("Thread modifying mem %d\n", tnum);
             unsigned char *p = (unsigned char *)memptr;
