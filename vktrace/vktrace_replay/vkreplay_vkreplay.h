@@ -106,6 +106,7 @@ class vkReplay {
     VkResult manually_replay_vkCreateBuffer(packet_vkCreateBuffer* pPacket);
     VkResult manually_replay_vkCreateImage(packet_vkCreateImage* pPacket);
     VkResult manually_replay_vkCreateCommandPool(packet_vkCreateCommandPool* pPacket);
+    void manually_replay_vkDestroyImage(packet_vkDestroyImage *pPacket);
     VkResult manually_replay_vkEnumeratePhysicalDevices(packet_vkEnumeratePhysicalDevices* pPacket);
     // TODO138 : Many new functions in API now that we need to assess if manual code needed
     // VkResult manually_replay_vkGetPhysicalDeviceInfo(packet_vkGetPhysicalDeviceInfo* pPacket);
@@ -142,6 +143,7 @@ class vkReplay {
     VkResult manually_replay_vkInvalidateMappedMemoryRanges(packet_vkInvalidateMappedMemoryRanges* pPacket);
     void manually_replay_vkGetPhysicalDeviceMemoryProperties(packet_vkGetPhysicalDeviceMemoryProperties* pPacket);
     void manually_replay_vkGetPhysicalDeviceQueueFamilyProperties(packet_vkGetPhysicalDeviceQueueFamilyProperties* pPacket);
+    void manually_replay_vkGetImageMemoryRequirements(packet_vkGetImageMemoryRequirements *pPacket);
     VkResult manually_replay_vkGetPhysicalDeviceSurfaceSupportKHR(packet_vkGetPhysicalDeviceSurfaceSupportKHR* pPacket);
     VkResult manually_replay_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(packet_vkGetPhysicalDeviceSurfaceCapabilitiesKHR* pPacket);
     VkResult manually_replay_vkGetPhysicalDeviceSurfaceFormatsKHR(packet_vkGetPhysicalDeviceSurfaceFormatsKHR* pPacket);
@@ -205,6 +207,10 @@ class vkReplay {
     // Map VkPhysicalDevice to VkPhysicalDeviceMemoryProperites
     std::unordered_map<VkPhysicalDevice, VkPhysicalDeviceMemoryProperties> traceMemoryProperties;
     std::unordered_map<VkPhysicalDevice, VkPhysicalDeviceMemoryProperties> replayMemoryProperties;
+
+    // Map VkImage to VkMemoryRequirements
+    std::unordered_map<VkImage, VkMemoryRequirements> traceGetImageMemoryRequirements;
+    std::unordered_map<VkImage, VkMemoryRequirements> replayGetImageMemoryRequirements;
 
     bool getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uint32_t traceIdx, uint32_t* pReplayIdx);
 

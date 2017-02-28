@@ -344,7 +344,8 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateMemory(VkDevic
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pAllocateInfo));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pAllocator));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pMemory));
-    // Append the original returned memory address - this takes up two ptrs
+    // Append the original returned memory address - this takes up two ptrs since vktrace_add_buffer_to_trace_packet
+    // adds a buffer and a pointer to that buffer. Is there an alternative that doesn't waste a word?
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)((PBYTE)pPacket-(2*sizeof(VkDeviceMemory))), sizeof(VkDeviceMemory), pMemory);
     if (!g_trimEnabled) {
         // trim not enabled, send packet as usual

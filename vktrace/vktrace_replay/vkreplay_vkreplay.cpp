@@ -506,216 +506,25 @@ VkResult vkReplay::manually_replay_vkEnumeratePhysicalDevices(packet_vkEnumerate
     return replayResult;
 }
 
-// TODO138 : Some of these functions have been renamed/changed in v138, need to scrub them and update as appropriate
-// VkResult vkReplay::manually_replay_vkGetPhysicalDeviceInfo(packet_vkGetPhysicalDeviceInfo* pPacket)
-//{
-//    VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//    if (!m_display->m_initedVK)
-//    {
-//        VkPhysicalDevice remappedPhysicalDevice = m_objMapper.remap(pPacket->physicalDevice);
-//        if (remappedPhysicalDevice == VK_NULL_HANDLE)
-//            return VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//        switch (pPacket->infoType) {
-//        case VK_PHYSICAL_DEVICE_INFO_TYPE_PROPERTIES:
-//        {
-//            VkPhysicalDeviceProperties deviceProps;
-//            size_t dataSize = sizeof(VkPhysicalDeviceProperties);
-//            replayResult = m_vkFuncs.real_vkGetPhysicalDeviceInfo(remappedPhysicalDevice, pPacket->infoType, &dataSize,
-//                            (pPacket->pData == NULL) ? NULL : &deviceProps);
-//            if (pPacket->pData != NULL)
-//            {
-//                vktrace_LogVerbose("Replay Physical Device Properties");
-//                vktrace_LogVerbose("Vendor ID %x, Device ID %x, name %s", deviceProps.vendorId, deviceProps.deviceId,
-//                deviceProps.deviceName);
-//                vktrace_LogVerbose("API version %u, Driver version %u, gpu Type %u", deviceProps.apiVersion,
-//                deviceProps.driverVersion, deviceProps.deviceType);
-//                vktrace_LogVerbose("Max Descriptor Sets: %u", deviceProps.maxDescriptorSets);
-//                vktrace_LogVerbose("Max Bound Descriptor Sets: %u", deviceProps.maxBoundDescriptorSets);
-//                vktrace_LogVerbose("Max Thread Group Size: %u", deviceProps.maxThreadGroupSize);
-//                vktrace_LogVerbose("Max Color Attachments: %u", deviceProps.maxColorAttachments);
-//                vktrace_LogVerbose("Max Inline Memory Update Size: %llu", deviceProps.maxInlineMemoryUpdateSize);
-//            }
-//            break;
-//        }
-//        case VK_PHYSICAL_DEVICE_INFO_TYPE_PERFORMANCE:
-//        {
-//            VkPhysicalDevicePerformance devicePerfs;
-//            size_t dataSize = sizeof(VkPhysicalDevicePerformance);
-//            replayResult = m_vkFuncs.real_vkGetPhysicalDeviceInfo(remappedPhysicalDevice, pPacket->infoType, &dataSize,
-//                            (pPacket->pData == NULL) ? NULL : &devicePerfs);
-//            if (pPacket->pData != NULL)
-//            {
-//                vktrace_LogVerbose("Replay Physical Device Performance");
-//                vktrace_LogVerbose("Max device clock %f, max shader ALUs/clock %f, max texel fetches/clock %f",
-//                devicePerfs.maxDeviceClock, devicePerfs.aluPerClock, devicePerfs.texPerClock);
-//                vktrace_LogVerbose("Max primitives/clock %f, Max pixels/clock %f",devicePerfs.primsPerClock,
-//                devicePerfs.pixelsPerClock);
-//            }
-//            break;
-//        }
-//        case VK_PHYSICAL_DEVICE_INFO_TYPE_QUEUE_PROPERTIES:
-//        {
-//            VkPhysicalDeviceQueueProperties *pGpuQueue, *pQ;
-//            size_t dataSize = sizeof(VkPhysicalDeviceQueueProperties);
-//            size_t numQueues = 1;
-//            assert(pPacket->pDataSize);
-//            if ((*(pPacket->pDataSize) % dataSize) != 0)
-//                vktrace_LogWarning("vkGetPhysicalDeviceInfo() for QUEUE_PROPERTIES not an integral data size assuming 1");
-//            else
-//                numQueues = *(pPacket->pDataSize) / dataSize;
-//            dataSize = numQueues * dataSize;
-//            pQ = static_cast < VkPhysicalDeviceQueueProperties *> (vktrace_malloc(dataSize));
-//            pGpuQueue = pQ;
-//            replayResult = m_vkFuncs.real_vkGetPhysicalDeviceInfo(remappedPhysicalDevice, pPacket->infoType, &dataSize,
-//                            (pPacket->pData == NULL) ? NULL : pGpuQueue);
-//            if (pPacket->pData != NULL)
-//            {
-//                for (unsigned int i = 0; i < numQueues; i++)
-//                {
-//                    vktrace_LogVerbose("Replay Physical Device Queue Property for index %d, flags %u.", i, pGpuQueue->queueFlags);
-//                    vktrace_LogVerbose("Max available count %u, max atomic counters %u, supports timestamps
-//                    %u.",pGpuQueue->queueCount, pGpuQueue->maxAtomicCounters, pGpuQueue->supportsTimestamps);
-//                    pGpuQueue++;
-//                }
-//            }
-//            vktrace_free(pQ);
-//            break;
-//        }
-//        default:
-//        {
-//            size_t size = 0;
-//            void* pData = NULL;
-//            if (pPacket->pData != NULL && pPacket->pDataSize != NULL)
-//            {
-//                size = *pPacket->pDataSize;
-//                pData = vktrace_malloc(*pPacket->pDataSize);
-//            }
-//            replayResult = m_vkFuncs.real_vkGetPhysicalDeviceInfo(remappedPhysicalDevice, pPacket->infoType, &size, pData);
-//            if (replayResult == VK_SUCCESS)
-//            {
-///*                // TODO : We could pull this out into its own case of switch, and also may want to perform some
-////                //   validation between the trace values and replay values
-//                else*/ if (size != *pPacket->pDataSize && pData != NULL)
-//                {
-//                    vktrace_LogWarning("vkGetPhysicalDeviceInfo returned a differing data size: replay (%d bytes) vs trace (%d
-//                    bytes)", size, *pPacket->pDataSize);
-//                }
-//                else if (pData != NULL && memcmp(pData, pPacket->pData, size) != 0)
-//                {
-//                    vktrace_LogWarning("vkGetPhysicalDeviceInfo returned differing data contents than the trace file contained.");
-//                }
-//            }
-//            vktrace_free(pData);
-//            break;
-//        }
-//        };
-//    }
-//    return replayResult;
-//}
-
-// VkResult vkReplay::manually_replay_vkGetGlobalExtensionInfo(packet_vkGetGlobalExtensionInfo* pPacket)
-//{
-//    VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//    if (!m_display->m_initedVK) {
-//        replayResult = m_vkFuncs.real_vkGetGlobalExtensionInfo(pPacket->infoType, pPacket->extensionIndex, pPacket->pDataSize,
-//        pPacket->pData);
-//// TODO: Confirm that replay'd properties match with traced properties to ensure compatibility.
-////        if (replayResult == VK_SUCCESS) {
-////            for (unsigned int ext = 0; ext < sizeof(g_extensions) / sizeof(g_extensions[0]); ext++)
-////            {
-////                if (!strncmp(g_extensions[ext], pPacket->pExtName, strlen(g_extensions[ext]))) {
-////                    bool extInList = false;
-////                    for (unsigned int j = 0; j < m_display->m_extensions.size(); ++j) {
-////                        if (!strncmp(m_display->m_extensions[j], g_extensions[ext], strlen(g_extensions[ext])))
-////                            extInList = true;
-////                        break;
-////                    }
-////                    if (!extInList)
-////                        m_display->m_extensions.push_back((char *) g_extensions[ext]);
-////                    break;
-////                }
-////            }
-////        }
-//    }
-//    return replayResult;
-//}
-
-// VkResult vkReplay::manually_replay_vkGetPhysicalDeviceExtensionInfo(packet_vkGetPhysicalDeviceExtensionInfo* pPacket)
-//{
-//    VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//    if (!m_display->m_initedVK) {
-//        VkPhysicalDevice remappedPhysicalDevice = m_objMapper.remap(pPacket->physicalDevice);
-//        if (remappedPhysicalDevice == VK_NULL_HANDLE)
-//            return VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//        replayResult = m_vkFuncs.real_vkGetPhysicalDeviceExtensionInfo(remappedPhysicalDevice, pPacket->infoType,
-//        pPacket->extensionIndex, pPacket->pDataSize, pPacket->pData);
-//// TODO: Confirm that replay'd properties match with traced properties to ensure compatibility.
-////        if (replayResult == VK_SUCCESS) {
-////            for (unsigned int ext = 0; ext < sizeof(g_extensions) / sizeof(g_extensions[0]); ext++)
-////            {
-////                if (!strncmp(g_extensions[ext], pPacket->pExtName, strlen(g_extensions[ext]))) {
-////                    bool extInList = false;
-////                    for (unsigned int j = 0; j < m_display->m_extensions.size(); ++j) {
-////                        if (!strncmp(m_display->m_extensions[j], g_extensions[ext], strlen(g_extensions[ext])))
-////                            extInList = true;
-////                        break;
-////                    }
-////                    if (!extInList)
-////                        m_display->m_extensions.push_back((char *) g_extensions[ext]);
-////                    break;
-////                }
-////            }
-////        }
-//    }
-//    return replayResult;
-//}
-
-// VkResult vkReplay::manually_replay_vkGetSwapchainInfoWSI(packet_vkGetSwapchainInfoWSI* pPacket)
-//{
-//    VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
-//
-//    size_t dataSize = *pPacket->pDataSize;
-//    void* pData = vktrace_malloc(dataSize);
-//    VkSwapchainWSI remappedSwapchain = m_objMapper.remap_swapchainwsis(pPacket->swapchain);
-//    if (remappedSwapchain == VK_NULL_HANDLE)
-//    {
-//        vktrace_LogError("Skipping vkGetSwapchainInfoWSI() due to invalid remapped VkSwapchainWSI.");
-//        return VK_ERROR_VALIDATION_FAILED_EXT;
-//    }
-//    replayResult = m_vkFuncs.real_vkGetSwapchainInfoWSI(remappedSwapchain, pPacket->infoType, &dataSize, pData);
-//    if (replayResult == VK_SUCCESS)
-//    {
-//        if (dataSize != *pPacket->pDataSize)
-//        {
-//            vktrace_LogWarning("SwapchainInfo dataSize differs between trace (%d bytes) and replay (%d bytes)",
-//            *pPacket->pDataSize, dataSize);
-//        }
-//        if (pPacket->infoType == VK_SWAP_CHAIN_INFO_TYPE_IMAGES_WSI)
-//        {
-//            VkSwapchainImageInfoWSI* pImageInfoReplay = (VkSwapchainImageInfoWSI*)pData;
-//            VkSwapchainImageInfoWSI* pImageInfoTrace = (VkSwapchainImageInfoWSI*)pPacket->pData;
-//            size_t imageCountReplay = dataSize / sizeof(VkSwapchainImageInfoWSI);
-//            size_t imageCountTrace = *pPacket->pDataSize / sizeof(VkSwapchainImageInfoWSI);
-//            for (size_t i = 0; i < imageCountReplay && i < imageCountTrace; i++)
-//            {
-//                imageObj imgObj;
-//                imgObj.replayImage = pImageInfoReplay[i].image;
-//                m_objMapper.add_to_map(&pImageInfoTrace[i].image, &imgObj);
-//
-//                gpuMemObj memObj;
-//                memObj.replayGpuMem = pImageInfoReplay[i].memory;
-//                m_objMapper.add_to_map(&pImageInfoTrace[i].memory, &memObj);
-//            }
-//        }
-//    }
-//    vktrace_free(pData);
-//    return replayResult;
-//}
+void vkReplay::manually_replay_vkDestroyImage(packet_vkDestroyImage *pPacket) {
+    VkDevice remappedDevice = m_objMapper.remap_devices(pPacket->device);
+    if (remappedDevice == VK_NULL_HANDLE) {
+        vktrace_LogError("Error detected in vkDestroyImage() due to invalid remapped VkDevice.");
+        return;
+    }
+    VkImage remappedImage = m_objMapper.remap_images(pPacket->image);
+    if (pPacket->image != VK_NULL_HANDLE && remappedImage == VK_NULL_HANDLE)
+    {
+        vktrace_LogError("Error detected in vkDestroyImage() due to invalid remapped VkImage.");
+        return;
+    }
+    m_vkFuncs.real_vkDestroyImage(remappedDevice, remappedImage, pPacket->pAllocator);
+    if (traceGetImageMemoryRequirements.find(pPacket->image) != traceGetImageMemoryRequirements.end())
+       traceGetImageMemoryRequirements.erase(pPacket->image);
+    if (replayGetImageMemoryRequirements.find(remappedImage) != replayGetImageMemoryRequirements.end())
+       replayGetImageMemoryRequirements.erase(remappedImage);
+    return;
+}
 
 VkResult vkReplay::manually_replay_vkQueueSubmit(packet_vkQueueSubmit *pPacket) {
     VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
@@ -2557,6 +2366,26 @@ void vkReplay::manually_replay_vkGetPhysicalDeviceQueueFamilyProperties(packet_v
     return;
 }
 
+void vkReplay::manually_replay_vkGetImageMemoryRequirements(packet_vkGetImageMemoryRequirements *pPacket) {
+    VkDevice remappedDevice = m_objMapper.remap_devices(pPacket->device);
+    if (remappedDevice == VK_NULL_HANDLE) {
+        vktrace_LogError("Error detected in vkGetImageMemoryRequirements() due to invalid remapped VkDevice.");
+        return;
+    }
+
+    VkImage remappedImage = m_objMapper.remap_images(pPacket->image);
+    if (pPacket->image != VK_NULL_HANDLE && remappedImage == VK_NULL_HANDLE)
+    {
+        vktrace_LogError("Error detected in GetImageMemoryRequirements() due to invalid remapped VkImage.");
+        return;
+    }
+
+    traceGetImageMemoryRequirements[pPacket->image] = *(pPacket->pMemoryRequirements);
+    m_vkFuncs.real_vkGetImageMemoryRequirements(remappedDevice, remappedImage, pPacket->pMemoryRequirements);
+    replayGetImageMemoryRequirements[remappedImage] = *(pPacket->pMemoryRequirements);
+    return;
+}
+
 VkResult vkReplay::manually_replay_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     packet_vkGetPhysicalDeviceSurfaceCapabilitiesKHR *pPacket) {
     VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
@@ -2578,7 +2407,6 @@ VkResult vkReplay::manually_replay_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
 
     replayResult = m_vkFuncs.real_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(remappedphysicalDevice, remappedSurfaceKHR,
                                                                             pPacket->pSurfaceCapabilities);
-
     return replayResult;
 }
 

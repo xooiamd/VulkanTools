@@ -2746,6 +2746,7 @@ memoryTypeBits=%0x08X}",
                                  'QueuePresentKHR',
                                  'CmdWaitEvents',
                                  #'DestroyObject',
+                                 'DestroyImage',
                                  'EnumeratePhysicalDevices',
                                  'FreeMemory',
                                  'FreeDescriptorSets',
@@ -2782,6 +2783,7 @@ memoryTypeBits=%0x08X}",
                                  'CreateDebugReportCallbackEXT',
                                  'DestroyDebugReportCallbackEXT',
                                  'AllocateCommandBuffers',
+                                 'GetImageMemoryRequirements',
                                  ]
 
         # validate the manually_replay_funcs list
