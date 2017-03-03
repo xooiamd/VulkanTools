@@ -109,25 +109,7 @@ VKTRACE_THREAD_ROUTINE_RETURN_TYPE Process_RunWatchdogThread(LPVOID _procInfoPtr
 }
 
 // ------------------------------------------------------------------------------------------------
-vktrace_process_capture_trace_thread_info* pInfo;
 bool terminationSignalArrived=false;
-
-void appendPortabilityPacket()
-{
-    vktrace_LogAlways("Post processing trace file...");
-
-    //......
-
-    unsigned int sum=0;
-    for (unsigned int i=0; i<1000000; i++)
-    {
-        sum+=i;
-    }
-    vktrace_LogAlways("Post processing trace file %p, sum is %08x", pInfo->pProcessInfo->pTraceFile, sum);
-    vktrace_LogVerbose("Post processing of trace file completed");
-}
-
-// ------------------------------------------------------------------------------------------------
 void terminationSignalHandler(int sig)
 {
     terminationSignalArrived = true;
@@ -136,7 +118,7 @@ void terminationSignalHandler(int sig)
 // ------------------------------------------------------------------------------------------------
 VKTRACE_THREAD_ROUTINE_RETURN_TYPE Process_RunRecordTraceThread(LPVOID _threadInfo) {
 
-    pInfo = (vktrace_process_capture_trace_thread_info*)_threadInfo;
+    vktrace_process_capture_trace_thread_info* pInfo = (vktrace_process_capture_trace_thread_info*)_threadInfo;
 
     MessageStream* pMessageStream = vktrace_MessageStream_create(TRUE, "", VKTRACE_BASE_PORT + pInfo->tracerId);
     if (pMessageStream == NULL) {
@@ -224,9 +206,6 @@ VKTRACE_THREAD_ROUTINE_RETURN_TYPE Process_RunRecordTraceThread(LPVOID _threadIn
         // clean up
         vktrace_delete_trace_packet(&pHeader);
     }
-
-    vktrace_LogVerbose("Calling appendPortabilityPacket from end-of-loop");
-    appendPortabilityPacket();
 
 #if defined(WIN32)
     PostThreadMessage(pInfo->pProcessInfo->parentThreadId, VKTRACE_WM_COMPLETE, 0, 0);

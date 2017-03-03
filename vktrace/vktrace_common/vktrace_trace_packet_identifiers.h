@@ -71,6 +71,7 @@ typedef enum _VKTRACE_TRACE_PACKET_ID {
     VKTRACE_TPI_MARKER_API_GROUP_BEGIN,
     VKTRACE_TPI_MARKER_API_GROUP_END,
     VKTRACE_TPI_MARKER_TERMINATE_PROCESS,
+	VKTRACE_TPI_PORTABILITY_TABLE,
     VKTRACE_TPI_BEGIN_API_HERE  // this enum should always be the last in the list. Feel free to insert new ID above this one.
 } VKTRACE_TRACE_PACKET_ID;
 

@@ -253,6 +253,8 @@ void vktraceviewer_QReplayWorker::playCurrentTraceFile(uint64_t startPacketIndex
                 break;
             case VKTRACE_TPI_MARKER_TERMINATE_PROCESS:
                 break;
+            case VKTRACE_TPI_PORTABILITY_TABLE:
+                break;
             // TODO processing code for all the above cases
             default: {
                 if (pCurPacket->pHeader->tracer_id >= VKTRACE_MAX_TRACER_ID_ARRAY_SIZE ||

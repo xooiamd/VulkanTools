@@ -55,7 +55,7 @@ static FILE* vktrace_write_trace_file_header(vktrace_process_info* pProcInfo) {
     assert(pProcInfo != NULL);
 
     // open trace file
-    tracefp = fopen(pProcInfo->traceFilename, "wb");
+    tracefp = fopen(pProcInfo->traceFilename, "w+b");
     if (tracefp == NULL) {
         vktrace_LogError("Cannot open trace file for writing %s.", pProcInfo->traceFilename);
         return tracefp;
