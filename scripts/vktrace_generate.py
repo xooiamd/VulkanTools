@@ -2784,6 +2784,7 @@ memoryTypeBits=%0x08X}",
                                  'DestroyDebugReportCallbackEXT',
                                  'AllocateCommandBuffers',
                                  'GetImageMemoryRequirements',
+                                 'GetBufferMemoryRequirements',
                                  ]
 
         # validate the manually_replay_funcs list
