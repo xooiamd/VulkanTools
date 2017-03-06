@@ -256,14 +256,11 @@ char* find_available_filename(const char* originalFilename, bool bForceOverwrite
     return pOutputFilename;
 }
 
-
-
-
 static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
 {
     vktrace_trace_file_header fileHeader;
     vktrace_trace_packet_header packet;
-    size_t fileOffset;
+    size_t fileOffset = 0;
     size_t readSize;
     int rval;
     uint32_t lastPacketThreadId;
@@ -271,14 +268,9 @@ static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
     uint64_t lastPacketEndTime;
     std::vector<size_t> packetTable;
 
-    // DEBUG
-    void *d1=getenv("D1");
-    while (d1)
-       d1=d1;
-
-    // Sleep for just a short while so log messages from traced process appear before this one
-    Sleep(400);
-    vktrace_LogAlways("Post processing trace file...");
+    // Sleep for a short while so log messages from traced process appear before this one
+    Sleep(200);
+    vktrace_LogAlways("Post processing trace file");
 
     // Read the trace file, and create a table of offsets to packets containing:
     //    vkBindImageMemory              vkBindBufferMemory
@@ -312,22 +304,11 @@ static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
         lastPacketThreadId = packet.thread_id;
         lastPacketEndTime = packet.vktrace_end_time;
         fileOffset+=packet.size;
-        if (fileOffset%2)
-        {
-            printf("Odd!\n"); fflush(stdout);
-            d1=&fileOffset;
-            while (d1)
-               d1=d1;
-        }
     }
 
-    printf("fileoffset=%d\n", fileOffset); fflush(stdout);
-    void *d2=getenv("D2");
-    if(d2) return;
-
-    // Add the pointer to the start of the table to the end of the table
+    // Add a pointer to the start of the table. This pointer is the
+    // last 8 bytes in the file.
     packetTable.push_back(fileOffset);
-
 
     // Append the table packet to the trace file.  If the last packet in
     // the file was not complete, we will overwrite the incomplete packet.
@@ -347,14 +328,8 @@ static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
         packetTable.size() == fwrite(&packetTable[0], sizeof(size_t), packetTable.size(), pTraceFile))
     {
         //TODO: modify packet header to indicate portaility table has been written
-        printf("table written!!\n"); fflush(stdout);
     }
 
-    size_t *p = &packetTable[0];
-    printf("global_packet_index=%ld\n", packet.global_packet_index);
-    printf("tablesize = %ld\n", packetTable.size());
-
-    printf("filesize should be %ld\n", fileOffset + sizeof(packet)+packetTable.size()*8 ); fflush(stdout);
     vktrace_LogVerbose("Post processing of trace file completed");
 }
 
