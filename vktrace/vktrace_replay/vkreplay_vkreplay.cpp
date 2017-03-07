@@ -509,6 +509,26 @@ VkResult vkReplay::manually_replay_vkEnumeratePhysicalDevices(packet_vkEnumerate
     return replayResult;
 }
 
+void vkReplay::manually_replay_vkDestroyBuffer(packet_vkDestroyBuffer *pPacket) {
+    VkDevice remappedDevice = m_objMapper.remap_devices(pPacket->device);
+    if (remappedDevice == VK_NULL_HANDLE) {
+        vktrace_LogError("Error detected in vkDestroyBuffer() due to invalid remapped VkDevice.");
+        return;
+    }
+    VkBuffer remappedBuffer = m_objMapper.remap_buffers(pPacket->buffer);
+    if (pPacket->buffer != VK_NULL_HANDLE && remappedBuffer == VK_NULL_HANDLE)
+    {
+        vktrace_LogError("Error detected in vkDestroyBuffer() due to invalid remapped VkBuffer.");
+        return;
+    }
+    m_vkFuncs.real_vkDestroyBuffer(remappedDevice, remappedBuffer, pPacket->pAllocator);
+    if (traceGetBufferMemoryRequirements.find(pPacket->buffer) != traceGetBufferMemoryRequirements.end())
+       traceGetBufferMemoryRequirements.erase(pPacket->buffer);
+    if (replayGetBufferMemoryRequirements.find(remappedBuffer) != replayGetBufferMemoryRequirements.end())
+       replayGetBufferMemoryRequirements.erase(remappedBuffer);
+    return;
+}
+
 void vkReplay::manually_replay_vkDestroyImage(packet_vkDestroyImage *pPacket) {
     VkDevice remappedDevice = m_objMapper.remap_devices(pPacket->device);
     if (remappedDevice == VK_NULL_HANDLE) {

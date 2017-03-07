@@ -106,6 +106,7 @@ class vkReplay {
     VkResult manually_replay_vkCreateBuffer(packet_vkCreateBuffer* pPacket);
     VkResult manually_replay_vkCreateImage(packet_vkCreateImage* pPacket);
     VkResult manually_replay_vkCreateCommandPool(packet_vkCreateCommandPool* pPacket);
+    void manually_replay_vkDestroyBuffer(packet_vkDestroyBuffer *pPacket);
     void manually_replay_vkDestroyImage(packet_vkDestroyImage *pPacket);
     VkResult manually_replay_vkEnumeratePhysicalDevices(packet_vkEnumeratePhysicalDevices* pPacket);
     // TODO138 : Many new functions in API now that we need to assess if manual code needed
