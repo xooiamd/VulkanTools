@@ -27,8 +27,9 @@
 #define VKTRACE_TRACE_FILE_VERSION_3 0x0003
 #define VKTRACE_TRACE_FILE_VERSION_4 0x0004
 #define VKTRACE_TRACE_FILE_VERSION_5 0x0005
-#define VKTRACE_TRACE_FILE_VERSION VKTRACE_TRACE_FILE_VERSION_5
-#define VKTRACE_TRACE_FILE_VERSION_MINIMUM_COMPATIBLE VKTRACE_TRACE_FILE_VERSION_5
+#define VKTRACE_TRACE_FILE_VERSION_6 0x0006
+#define VKTRACE_TRACE_FILE_VERSION VKTRACE_TRACE_FILE_VERSION_6
+#define VKTRACE_TRACE_FILE_VERSION_MINIMUM_COMPATIBLE VKTRACE_TRACE_FILE_VERSION_6
 
 #define VKTRACE_MAX_TRACER_ID_ARRAY_SIZE 14
 
@@ -91,6 +92,7 @@ typedef struct {
     vktrace_tracer_info
         tracer_id_array[VKTRACE_MAX_TRACER_ID_ARRAY_SIZE];  // array of tracer_ids and values which are referenced in the trace file
     uint64_t trace_start_time;
+    uint32_t portabilityTableValid;
 } vktrace_trace_file_header;
 
 typedef struct {

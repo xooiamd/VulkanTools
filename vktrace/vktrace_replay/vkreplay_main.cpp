@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string>
 #if defined(ANDROID)
-#include <vector>
 #include <sstream>
 #include <android/log.h>
 #include <android_native_app_glue.h>
@@ -283,6 +282,36 @@ void loggingCallback(VktraceLogLevel level, const char* pMessage) {
 #endif  // ANDROID
 }
 
+static bool readPortabilityTable(FILE *tracefp)
+{
+    size_t tableSize;
+    int originalFilePos;
+
+    originalFilePos = ftell(tracefp);
+    if (-1 == originalFilePos)
+        return false;
+    if (0 != fseek(tracefp, -sizeof(size_t), SEEK_END))
+        return false;
+    if (1 != fread(&tableSize, sizeof(size_t), 1, tracefp))
+        return false;
+    if (0 != fseek(tracefp, -(tableSize+1)*sizeof(size_t), SEEK_END))
+        return false;
+    portabilityTable.resize(tableSize);
+    if (tableSize != fread(&portabilityTable[0], sizeof(size_t), tableSize, tracefp))
+        return false;
+    if (0 != fseek(tracefp, originalFilePos, SEEK_SET))
+        return false;
+
+    vktrace_LogDebug("portabilityTable size=%ld\n", tableSize);
+    for (int i=0; i<tableSize; i++)
+        vktrace_LogDebug("   %p %ld\n", &portabilityTable[i], portabilityTable[i]);
+
+    return true;
+
+failure:
+    return false;
+}
+
 int vkreplay_main(int argc, char** argv, vktrace_window_handle window = 0) {
     int err = 0;
     vktrace_SettingGroup* pAllSettings = NULL;
@@ -390,6 +419,12 @@ int vkreplay_main(int argc, char** argv, vktrace_window_handle window = 0) {
             "older replayer.",
             fileHeader.trace_file_version, VKTRACE_TRACE_FILE_VERSION_MINIMUM_COMPATIBLE);
     }
+
+    // read portability table if it exists
+    if (fileHeader.portabilityTableValid)
+        fileHeader.portabilityTableValid = readPortabilityTable(tracefp);
+    if (!fileHeader.portabilityTableValid)
+        vktrace_LogAlways("Trace file does not appear to contain portability table. Will not attempt to map memoryType indices.");
 
     // load any API specific driver libraries and init replayer objects
     uint8_t tidApi = VKTRACE_TID_RESERVED;

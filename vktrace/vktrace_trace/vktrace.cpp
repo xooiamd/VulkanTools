@@ -306,9 +306,10 @@ static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
         fileOffset+=packet.size;
     }
 
-    // Add a pointer to the start of the table. This pointer is the
-    // last 8 bytes in the file.
-    packetTable.push_back(fileOffset);
+    printf("File scanned, tablesize=%ld\n", packetTable.size()); fflush(stdout);
+
+    // Add a word containing the size of the table to the table.
+    packetTable.push_back(packetTable.size());
 
     // Append the table packet to the trace file.  If the last packet in
     // the file was not complete, we will overwrite the incomplete packet.
@@ -327,7 +328,10 @@ static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
         1 == fwrite(&packet, sizeof(packet), 1, pTraceFile) &&
         packetTable.size() == fwrite(&packetTable[0], sizeof(size_t), packetTable.size(), pTraceFile))
     {
-        //TODO: modify packet header to indicate portaility table has been written
+        // Set the flag the file header that indicates portability table has been written
+        fileHeader.portabilityTableValid = 1;
+        if (0 == fseek(pTraceFile, 0,  SEEK_SET))
+            fwrite(&fileHeader, sizeof(fileHeader), 1, pTraceFile);
     }
 
     vktrace_LogVerbose("Post processing of trace file completed");

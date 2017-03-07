@@ -27,6 +27,7 @@
 #include "vkreplay_vkreplay.h"
 #include "vkreplay.h"
 #include "vkreplay_settings.h"
+#include "vkreplay_main.h"
 
 #include <algorithm>
 
@@ -48,6 +49,8 @@ vkReplay::vkReplay(vkreplayer_settings *pReplaySettings) {
 
     m_frameNumber = 0;
 }
+
+std::vector<size_t> portabilityTable;
 
 vkReplay::~vkReplay() {
     delete m_display;
@@ -2049,6 +2052,8 @@ fail:
 VkResult vkReplay::manually_replay_vkAllocateMemory(packet_vkAllocateMemory *pPacket) {
     VkResult replayResult = VK_ERROR_VALIDATION_FAILED_EXT;
     gpuMemObj local_mem;
+
+    portabilityTable.size(); // TODO: Really use the table
 
     VkDevice remappedDevice = m_objMapper.remap_devices(pPacket->device);
     if (remappedDevice == VK_NULL_HANDLE) {
