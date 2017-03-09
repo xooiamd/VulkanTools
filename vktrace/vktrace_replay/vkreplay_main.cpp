@@ -282,7 +282,7 @@ void loggingCallback(VktraceLogLevel level, const char* pMessage) {
 #endif  // ANDROID
 }
 
-static bool readPortabilityTable(FILE *tracefp)
+static bool readPortabilityTable()
 {
     size_t tableSize;
     int originalFilePos;
@@ -304,7 +304,7 @@ static bool readPortabilityTable(FILE *tracefp)
 
     vktrace_LogDebug("portabilityTable size=%ld\n", tableSize);
     for (int i=0; i<tableSize; i++)
-        vktrace_LogDebug("   %p %ld\n", &portabilityTable[i], portabilityTable[i]);
+        vktrace_LogDebug("   %p %ld", &portabilityTable[i], portabilityTable[i]);
 
     return true;
 
@@ -375,7 +375,6 @@ int vkreplay_main(int argc, char** argv, vktrace_window_handle window = 0) {
     // open trace file and read in header
     char* pTraceFile = replaySettings.pTraceFilePath;
     vktrace_trace_file_header fileHeader;
-    FILE* tracefp;
 
     if (pTraceFile != NULL && strlen(pTraceFile) > 0) {
         tracefp = fopen(pTraceFile, "rb");
@@ -422,7 +421,7 @@ int vkreplay_main(int argc, char** argv, vktrace_window_handle window = 0) {
 
     // read portability table if it exists
     if (fileHeader.portabilityTableValid)
-        fileHeader.portabilityTableValid = readPortabilityTable(tracefp);
+        fileHeader.portabilityTableValid = readPortabilityTable();
     if (!fileHeader.portabilityTableValid)
         vktrace_LogAlways("Trace file does not appear to contain portability table. Will not attempt to map memoryType indices.");
 

@@ -218,7 +218,7 @@ class vkReplay {
     std::unordered_map<VkBuffer, VkMemoryRequirements> traceGetBufferMemoryRequirements;
     std::unordered_map<VkBuffer, VkMemoryRequirements> replayGetBufferMemoryRequirements;
 
-    bool getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uint32_t traceIdx, uint32_t* pReplayIdx);
+    bool getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uint32_t traceIdx, VkMemoryRequirements *memRequirements, uint32_t* pReplayIdx);
 
     bool getQueueFamilyIdx(VkPhysicalDevice tracePhysicalDevice, VkPhysicalDevice replayPhysicalDevice, uint32_t traceIdx,
                            uint32_t* pReplayIdx);

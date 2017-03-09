@@ -256,6 +256,8 @@ char* find_available_filename(const char* originalFilename, bool bForceOverwrite
     return pOutputFilename;
 }
 
+// TODO: Avoid scanning the file. Create this table packet as packets arrive from trace process,
+// then simply append the table to the file.
 static void vktrace_appendPortabilityPacket(FILE *pTraceFile)
 {
     vktrace_trace_file_header fileHeader;

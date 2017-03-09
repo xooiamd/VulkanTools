@@ -330,7 +330,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateMemory(VkDevic
     VkResult result;
     vktrace_trace_packet_header* pHeader;
     packet_vkAllocateMemory* pPacket = NULL;
-    size_t packetSize = get_struct_chain_size((void*)pAllocateInfo) + sizeof(VkAllocationCallbacks) + sizeof(VkDeviceMemory)*3;
+    size_t packetSize = get_struct_chain_size((void*)pAllocateInfo) + sizeof(VkAllocationCallbacks) + sizeof(VkDeviceMemory)*2;
     CREATE_TRACE_PACKET(vkAllocateMemory, packetSize);
     result = mdd(device)->devTable.AllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
     vktrace_set_packet_entrypoint_end_time(pHeader);
@@ -344,9 +344,8 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateMemory(VkDevic
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pAllocateInfo));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pAllocator));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pMemory));
-    // Append the original returned memory address - this takes up two ptrs since vktrace_add_buffer_to_trace_packet
-    // adds a buffer and a pointer to that buffer. Is there an alternative that doesn't waste a word?
-    vktrace_add_buffer_to_trace_packet(pHeader, (void**)((PBYTE)pPacket-(2*sizeof(VkDeviceMemory))), sizeof(VkDeviceMemory), pMemory);
+    *((VkDeviceMemory*)((PBYTE)pHeader+pHeader->size-(sizeof(VkDeviceMemory)))) = *pMemory;
+
     if (!g_trimEnabled) {
         // trim not enabled, send packet as usual
         FINISH_TRACE_PACKET();
