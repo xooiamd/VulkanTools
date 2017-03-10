@@ -1998,8 +1998,6 @@ bool vkReplay::getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uin
     bool foundMatch = false;
     uint32_t i, j;
 
-    // TODO: NEED TO HANDLE ONE MORE ARG
-
     if (tracePhysicalDevices.find(traceDevice) == tracePhysicalDevices.end() ||
         replayPhysicalDevices.find(replayDevice) == replayPhysicalDevices.end()) {
         goto fail;
@@ -2013,11 +2011,14 @@ bool vkReplay::getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uin
         goto fail;
     }
 
+    // Search for an exact match from set of bits in memoryRequirements->memoryTypeBits
     for (i = 0; i < min(traceMemoryProperties[tracePhysicalDevice].memoryTypeCount,
                         replayMemoryProperties[replayPhysicalDevice].memoryTypeCount);
          i++) {
-        if (traceMemoryProperties[tracePhysicalDevice].memoryTypes[traceIdx].propertyFlags ==
-            replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags) {
+        if (((1<<i) & memRequirements->memoryTypeBits) &&
+            traceMemoryProperties[tracePhysicalDevice].memoryTypes[traceIdx].propertyFlags ==
+            replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags)
+        {
             *pReplayIdx = i;
             foundMatch = true;
             break;
@@ -2026,12 +2027,15 @@ bool vkReplay::getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uin
 
     if (!foundMatch) {
         // Didn't find an exact match, search for a superset
+        // from set of bits in memoryRequirements->memoryTypeBits
         for (i = 0; i < min(traceMemoryProperties[tracePhysicalDevice].memoryTypeCount,
                             replayMemoryProperties[replayPhysicalDevice].memoryTypeCount);
              i++) {
-            if (traceMemoryProperties[tracePhysicalDevice].memoryTypes[traceIdx].propertyFlags ==
+            if (((1<<i) & memRequirements->memoryTypeBits) &&
+                traceMemoryProperties[tracePhysicalDevice].memoryTypes[traceIdx].propertyFlags ==
                 (traceMemoryProperties[tracePhysicalDevice].memoryTypes[traceIdx].propertyFlags &
-                 replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags)) {
+                 replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags))
+            {
                 *pReplayIdx = i;
                 foundMatch = true;
                 break;
@@ -2041,9 +2045,12 @@ bool vkReplay::getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uin
 
     if (!foundMatch) {
         // Didn't find a superset, search for mem type with both HOST_VISIBLE and HOST_COHERENT set
+        // from set of bits in memoryRequirements->memoryTypeBits
         for (i = 0; i < replayMemoryProperties[replayPhysicalDevice].memoryTypeCount; i++) {
-            if ((VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) &
-                replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags) {
+            if (((1<<i) & memRequirements->memoryTypeBits) &&
+                (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) &
+                replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags)
+            {
                 *pReplayIdx = i;
                 foundMatch = true;
                 break;
@@ -2052,16 +2059,6 @@ bool vkReplay::getMemoryTypeIdx(VkDevice traceDevice, VkDevice replayDevice, uin
     }
 
     if (foundMatch) {
-        // Check to see if there are other replayMemoryProperties identical to the one that matched.
-        // If there are, print a warning and use the index from the trace file.
-        for (j = i + 1; j < replayMemoryProperties[replayPhysicalDevice].memoryTypeCount; j++) {
-            if (replayMemoryProperties[replayPhysicalDevice].memoryTypes[i].propertyFlags ==
-                replayMemoryProperties[replayPhysicalDevice].memoryTypes[j].propertyFlags) {
-                vktrace_LogWarning("memoryTypes propertyFlags identical in two or more entries, using idx %d from trace", traceIdx);
-                *pReplayIdx = traceIdx;
-                return true;
-            }
-        }
         return true;
     }
 
