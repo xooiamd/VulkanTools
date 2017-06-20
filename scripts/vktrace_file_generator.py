@@ -580,6 +580,10 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                                  'AllocateCommandBuffers',
                                  'GetImageMemoryRequirements',
                                  'GetBufferMemoryRequirements',
+                                 'CreateDescriptorUpdateTemplateKHR',
+                                 'DestroyDescriptorUpdateTemplateKHR',
+                                 'UpdateDescriptorSetWithTemplateKHR',
+                                 'CmdPushDescriptorSetWithTemplateKHR',
                                  ]
         # Map APIs to functions if body is fully custom
         custom_body_dict = {'CreateInstance': self.GenReplayCreateInstance,

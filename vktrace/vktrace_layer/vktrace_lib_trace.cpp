@@ -3323,7 +3323,6 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateAndroidSurfaceKH
 }
 #endif
 
-// Really should declare struct with a count and a pointer to entries, but we're saving the whole struct for now
 static std::unordered_map<VkDescriptorUpdateTemplateKHR, VkDescriptorUpdateTemplateCreateInfoKHR*> descriptorUpdateTemplateCreateInfo;
 
 VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateDescriptorUpdateTemplateKHR(
@@ -3386,7 +3385,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTem
     packet_vkUpdateDescriptorSetWithTemplateKHR* pPacket = NULL;
 
     // TODO: We're saving all the data, from pData to the end of the last item, including data before offset and skipped data
-    // This could be optimized to save the data chunks that are actually needed.
+    // This could be optimized to save only the data chunks that are actually needed.
 
     for (uint32_t i = 0; i < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->descriptorUpdateEntryCount; i++) {
         for (uint32_t j = 0; j < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorCount; j++) {
@@ -3410,13 +3409,13 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTem
                     thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkBufferView);
                     break;
                 default:
+                    assert(0);
                     break;
             }
             dataSize = std::max(dataSize, thisSize);
         }
     }
 
-    vktrace_LogAlways("vkUpdateDescriptorSetWithTemplateKHR datasize is %ld", dataSize);
     CREATE_TRACE_PACKET(vkUpdateDescriptorSetWithTemplateKHR, dataSize);
     mdd(device)->devTable.UpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
     vktrace_set_packet_entrypoint_end_time(pHeader);
@@ -3463,7 +3462,14 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkDestroyDescriptorUpdateTem
             vktrace_delete_trace_packet(&pHeader);
         }
     }
-    descriptorUpdateTemplateCreateInfo.erase(descriptorUpdateTemplate);
+    if (descriptorUpdateTemplateCreateInfo.find(descriptorUpdateTemplate) != descriptorUpdateTemplateCreateInfo.end()) {
+        if (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]) {
+            if (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries)
+                free((void *)descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries);
+            free(descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]);
+        }
+        descriptorUpdateTemplateCreateInfo.erase(descriptorUpdateTemplate);
+    }
 }
 
 VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPushDescriptorSetWithTemplateKHR(
@@ -3497,7 +3503,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPushDescriptorSetWithTe
         }
     }
 #else
-    vktrace_LogWarning("Tracing of vkCmdPushDescriptorSetWithTemplateKHR not yet implemented");
+    vktrace_LogWarning("vkCmdPushDescriptorSetWithTemplateKHR not yet implemented");
 #endif
 }
 
