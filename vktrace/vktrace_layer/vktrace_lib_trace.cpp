@@ -22,6 +22,7 @@
  * Author: Mark Lobodzinski <mark@lunarg.com>
  * Author: David Pinedo <david@lunarg.com>
  */
+#define NOMINMAX
 #include <stdbool.h>
 #include <algorithm>
 #include <unordered_map>
@@ -3437,7 +3438,7 @@ static size_t getDescriptorSetDataSize(VkDescriptorUpdateTemplateKHR descriptorU
                     assert(0);
                     break;
             }
-            dataSize = max(dataSize, thisSize);
+            dataSize = std::max(dataSize, thisSize);
         }
     }
     return dataSize;
