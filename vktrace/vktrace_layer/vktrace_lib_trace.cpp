@@ -3374,69 +3374,6 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateDescriptorUpdate
     return result;
 }
 
-VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTemplateKHR(
-    VkDevice device,
-    VkDescriptorSet descriptorSet,
-    VkDescriptorUpdateTemplateKHR descriptorUpdateTemplate,
-    const void* pData)
-{
-    size_t dataSize = 0;
-    vktrace_trace_packet_header* pHeader;
-    packet_vkUpdateDescriptorSetWithTemplateKHR* pPacket = NULL;
-
-    // TODO: We're saving all the data, from pData to the end of the last item, including data before offset and skipped data
-    // This could be optimized to save only the data chunks that are actually needed.
-
-    for (uint32_t i = 0; i < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->descriptorUpdateEntryCount; i++) {
-        for (uint32_t j = 0; j < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorCount; j++) {
-            size_t thisSize;
-            switch (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorType) {
-                case VK_DESCRIPTOR_TYPE_SAMPLER:
-                case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-                case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorImageInfo);
-                    break;
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
-                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorBufferInfo);
-                    break;
-                case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
-                case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkBufferView);
-                    break;
-                default:
-                    assert(0);
-                    break;
-            }
-            dataSize = max(dataSize, thisSize);
-        }
-    }
-
-    CREATE_TRACE_PACKET(vkUpdateDescriptorSetWithTemplateKHR, dataSize);
-    mdd(device)->devTable.UpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
-    vktrace_set_packet_entrypoint_end_time(pHeader);
-    pPacket = interpret_body_as_vkUpdateDescriptorSetWithTemplateKHR(pHeader);
-    pPacket->device = device;
-    pPacket->descriptorSet = descriptorSet;
-    pPacket->descriptorUpdateTemplate = descriptorUpdateTemplate;
-    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pData), dataSize, pData);
-    vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pData));
-    if (!g_trimEnabled) {
-        FINISH_TRACE_PACKET();
-    } else {
-        vktrace_finalize_trace_packet(pHeader);
-        if (g_trimIsInTrim) {
-            trim::write_packet(pHeader);
-        } else {
-            vktrace_delete_trace_packet(&pHeader);
-        }
-    }
-}
-
 VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkDestroyDescriptorUpdateTemplateKHR(
     VkDevice device,
     VkDescriptorUpdateTemplateKHR descriptorUpdateTemplate,
@@ -3472,25 +3409,93 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkDestroyDescriptorUpdateTem
     }
 }
 
-VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPushDescriptorSetWithTemplateKHR(
-    VkCommandBuffer commandBuffer,
+static size_t getDescriptorSetDataSize(VkDescriptorUpdateTemplateKHR descriptorUpdateTemplate)
+{
+    size_t dataSize = 0;
+    for (uint32_t i = 0; i < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->descriptorUpdateEntryCount; i++) {
+        for (uint32_t j = 0; j < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorCount; j++) {
+            size_t thisSize;
+            switch (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorType) {
+                case VK_DESCRIPTOR_TYPE_SAMPLER:
+                case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+                case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorImageInfo);
+                    break;
+                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorBufferInfo);
+                    break;
+                case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+                case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkBufferView);
+                    break;
+                default:
+                    assert(0);
+                    break;
+            }
+            dataSize = max(dataSize, thisSize);
+        }
+    }
+    return dataSize;
+}
+
+VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTemplateKHR(
+    VkDevice device,
+    VkDescriptorSet descriptorSet,
     VkDescriptorUpdateTemplateKHR descriptorUpdateTemplate,
-    VkPipelineLayout layout,
-    uint32_t set,
     const void* pData)
 {
-#if 0
     vktrace_trace_packet_header* pHeader;
-    packet_vkCmdPushDescriptorSetWithTemplateKHR* pPacket = NULL;
-    CREATE_TRACE_PACKET(vkCmdPushDescriptorSetWithTemplateKHR, sizeof(void*));
-    mdd(commandBuffer)->devTable.CmdPushDescriptorSetWithTemplateKHR(commandBuffer, descriptorUpdateTemplate, layout, set, pData);
+    packet_vkUpdateDescriptorSetWithTemplateKHR* pPacket = NULL;
+    size_t dataSize;
+
+    // TODO: We're saving all the data, from pData to the end of the last item, including data before offset and skipped data.
+    // This could be optimized to save only the data chunks that are actually needed.
+    dataSize = getDescriptorSetDataSize(descriptorUpdateTemplate);
+#if 0
+
+    for (uint32_t i = 0; i < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->descriptorUpdateEntryCount; i++) {
+        for (uint32_t j = 0; j < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorCount; j++) {
+            size_t thisSize;
+            switch (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorType) {
+                case VK_DESCRIPTOR_TYPE_SAMPLER:
+                case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+                case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorImageInfo);
+                    break;
+                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorBufferInfo);
+                    break;
+                case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+                case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkBufferView);
+                    break;
+                default:
+                    assert(0);
+                    break;
+            }
+            dataSize = max(dataSize, thisSize);
+        }
+    }
+#endif
+
+    CREATE_TRACE_PACKET(vkUpdateDescriptorSetWithTemplateKHR, dataSize);
+    mdd(device)->devTable.UpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
     vktrace_set_packet_entrypoint_end_time(pHeader);
-    pPacket = interpret_body_as_vkCmdPushDescriptorSetWithTemplateKHR(pHeader);
-    pPacket->commandBuffer = commandBuffer;
+    pPacket = interpret_body_as_vkUpdateDescriptorSetWithTemplateKHR(pHeader);
+    pPacket->device = device;
+    pPacket->descriptorSet = descriptorSet;
     pPacket->descriptorUpdateTemplate = descriptorUpdateTemplate;
-    pPacket->layout = layout;
-    pPacket->set = set;
-    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pData), _dataSize, pData /*@1@*/ );
+    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pData), dataSize, pData);
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pData));
     if (!g_trimEnabled) {
         FINISH_TRACE_PACKET();
@@ -3502,9 +3507,43 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPushDescriptorSetWithTe
             vktrace_delete_trace_packet(&pHeader);
         }
     }
-#else
-    vktrace_LogWarning("vkCmdPushDescriptorSetWithTemplateKHR not yet implemented");
-#endif
+}
+
+VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPushDescriptorSetWithTemplateKHR(
+    VkCommandBuffer commandBuffer,
+    VkDescriptorUpdateTemplateKHR descriptorUpdateTemplate,
+    VkPipelineLayout layout,
+    uint32_t set,
+    const void* pData)
+{
+    vktrace_trace_packet_header* pHeader;
+    packet_vkCmdPushDescriptorSetWithTemplateKHR* pPacket = NULL;
+    size_t dataSize;
+
+    // TODO: We're saving all the data, from pData to the end of the last item, including data before offset and skipped data.
+    // This could be optimized to save only the data chunks that are actually needed.
+    dataSize = getDescriptorSetDataSize(descriptorUpdateTemplate);
+
+    CREATE_TRACE_PACKET(vkCmdPushDescriptorSetWithTemplateKHR, dataSize);
+    mdd(commandBuffer)->devTable.CmdPushDescriptorSetWithTemplateKHR(commandBuffer, descriptorUpdateTemplate, layout, set, pData);
+    vktrace_set_packet_entrypoint_end_time(pHeader);
+    pPacket = interpret_body_as_vkCmdPushDescriptorSetWithTemplateKHR(pHeader);
+    pPacket->commandBuffer = commandBuffer;
+    pPacket->descriptorUpdateTemplate = descriptorUpdateTemplate;
+    pPacket->layout = layout;
+    pPacket->set = set;
+    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pData), dataSize, pData);
+    vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pData));
+    if (!g_trimEnabled) {
+        FINISH_TRACE_PACKET();
+    } else {
+        vktrace_finalize_trace_packet(pHeader);
+        if (g_trimIsInTrim) {
+            trim::write_packet(pHeader);
+        } else {
+            vktrace_delete_trace_packet(&pHeader);
+        }
+    }
 }
 
 
@@ -3722,30 +3761,27 @@ static inline PFN_vkVoidFunction layer_intercept_instance_proc(const char* name)
  */
 VKTRACER_EXPORT VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vktraceGetDeviceProcAddr(VkDevice device, const char* funcName) {
     PFN_vkVoidFunction addr;
-    if (gMessageStream != NULL) {
-        vktrace_trace_packet_header* pHeader;
-        packet_vkGetDeviceProcAddr* pPacket = NULL;
-        CREATE_TRACE_PACKET(vkGetDeviceProcAddr, ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0));
-        addr = __HOOKED_vkGetDeviceProcAddr(device, funcName);
-        vktrace_set_packet_entrypoint_end_time(pHeader);
-        pPacket = interpret_body_as_vkGetDeviceProcAddr(pHeader);
-        pPacket->device = device;
-        vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pName),
-                                           ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0), funcName);
-        pPacket->result = addr;
-        vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pName));
-        if (!g_trimEnabled) {
-            FINISH_TRACE_PACKET();
-        } else {
-            vktrace_finalize_trace_packet(pHeader);
-            if (g_trimIsInTrim) {
-                trim::write_packet(pHeader);
-            } else {
-                vktrace_delete_trace_packet(&pHeader);
-            }
-        }
+
+    vktrace_trace_packet_header* pHeader;
+    packet_vkGetDeviceProcAddr* pPacket = NULL;
+    CREATE_TRACE_PACKET(vkGetDeviceProcAddr, ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0));
+    addr = __HOOKED_vkGetDeviceProcAddr(device, funcName);
+    vktrace_set_packet_entrypoint_end_time(pHeader);
+    pPacket = interpret_body_as_vkGetDeviceProcAddr(pHeader);
+    pPacket->device = device;
+    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pName),
+                                       ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0), funcName);
+    pPacket->result = addr;
+    vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pName));
+    if (!g_trimEnabled) {
+        FINISH_TRACE_PACKET();
     } else {
-        addr = __HOOKED_vkGetDeviceProcAddr(device, funcName);
+        vktrace_finalize_trace_packet(pHeader);
+        if (g_trimIsInTrim) {
+            trim::write_packet(pHeader);
+        } else {
+            vktrace_delete_trace_packet(&pHeader);
+        }
     }
     return addr;
 }
@@ -3790,31 +3826,27 @@ VKTRACER_EXPORT VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL __HOOKED_vkGetDevicePro
  */
 VKTRACER_EXPORT VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL vktraceGetInstanceProcAddr(VkInstance instance, const char* funcName) {
     PFN_vkVoidFunction addr;
-    if (gMessageStream != NULL) {
-        vktrace_trace_packet_header* pHeader;
-        packet_vkGetInstanceProcAddr* pPacket = NULL;
-        // assert(strcmp("vkGetInstanceProcAddr", funcName));
-        CREATE_TRACE_PACKET(vkGetInstanceProcAddr, ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0));
-        addr = __HOOKED_vkGetInstanceProcAddr(instance, funcName);
-        vktrace_set_packet_entrypoint_end_time(pHeader);
-        pPacket = interpret_body_as_vkGetInstanceProcAddr(pHeader);
-        pPacket->instance = instance;
-        vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pName),
-                                           ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0), funcName);
-        pPacket->result = addr;
-        vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pName));
-        if (!g_trimEnabled) {
-            FINISH_TRACE_PACKET();
-        } else {
-            vktrace_finalize_trace_packet(pHeader);
-            if (g_trimIsInTrim) {
-                trim::write_packet(pHeader);
-            } else {
-                vktrace_delete_trace_packet(&pHeader);
-            }
-        }
+    vktrace_trace_packet_header* pHeader;
+    packet_vkGetInstanceProcAddr* pPacket = NULL;
+    // assert(strcmp("vkGetInstanceProcAddr", funcName));
+    CREATE_TRACE_PACKET(vkGetInstanceProcAddr, ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0));
+    addr = __HOOKED_vkGetInstanceProcAddr(instance, funcName);
+    vktrace_set_packet_entrypoint_end_time(pHeader);
+    pPacket = interpret_body_as_vkGetInstanceProcAddr(pHeader);
+    pPacket->instance = instance;
+    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pName),
+                                       ((funcName != NULL) ? ROUNDUP_TO_4(strlen(funcName) + 1) : 0), funcName);
+    pPacket->result = addr;
+    vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pName));
+    if (!g_trimEnabled) {
+        FINISH_TRACE_PACKET();
     } else {
-        addr = __HOOKED_vkGetInstanceProcAddr(instance, funcName);
+        vktrace_finalize_trace_packet(pHeader);
+        if (g_trimIsInTrim) {
+            trim::write_packet(pHeader);
+        } else {
+            vktrace_delete_trace_packet(&pHeader);
+        }
     }
 
     return addr;
@@ -3964,10 +3996,10 @@ VK_LAYER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL vkEnumerateDeviceExtensionPropert
 
 VK_LAYER_EXPORT VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL VK_LAYER_LUNARG_vktraceGetInstanceProcAddr(VkInstance instance,
                                                                                                     const char* funcName) {
-    return vktraceGetInstanceProcAddr(instance, funcName);
+    return __HOOKED_vkGetInstanceProcAddr(instance, funcName);
 }
 
 VK_LAYER_EXPORT VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL VK_LAYER_LUNARG_vktraceGetDeviceProcAddr(VkDevice device,
                                                                                                   const char* funcName) {
-    return vktraceGetDeviceProcAddr(device, funcName);
+    return __HOOKED_vkGetDeviceProcAddr(device, funcName);
 }
