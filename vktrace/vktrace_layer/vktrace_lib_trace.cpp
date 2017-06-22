@@ -3412,7 +3412,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTem
                     assert(0);
                     break;
             }
-            dataSize = std::max(dataSize, thisSize);
+            dataSize = max(dataSize, thisSize);
         }
     }
 

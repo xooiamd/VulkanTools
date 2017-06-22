@@ -251,6 +251,11 @@ VkResult vkReplay::manually_replay_vkCreateInstance(packet_vkCreateInstance *pPa
         if (replayResult == VK_SUCCESS) {
             m_objMapper.add_to_instances_map(*(pPacket->pInstance), inst);
         }
+
+        m_vkFuncs.real_vkCreateDescriptorUpdateTemplateKHR = (vkFuncs::type_vkCreateDescriptorUpdateTemplateKHR)m_vkFuncs.real_vkGetInstanceProcAddr(inst, "vkCreateDescriptorUpdateTemplateKHR");
+        m_vkFuncs.real_vkDestroyDescriptorUpdateTemplateKHR = (vkFuncs::type_vkDestroyDescriptorUpdateTemplateKHR)m_vkFuncs.real_vkGetInstanceProcAddr(inst, "vkDestroyDescriptorUpdateTemplateKHR");
+        m_vkFuncs.real_vkUpdateDescriptorSetWithTemplateKHR = (vkFuncs::type_vkUpdateDescriptorSetWithTemplateKHR)m_vkFuncs.real_vkGetInstanceProcAddr(inst, "vkUpdateDescriptorSetWithTemplateKHR");
+        m_vkFuncs.real_vkCmdPushDescriptorSetWithTemplateKHR = (vkFuncs::type_vkCmdPushDescriptorSetWithTemplateKHR)m_vkFuncs.real_vkGetInstanceProcAddr(inst, "vkCmdPushDescriptorSetWithTemplateKHR");
     }
     return replayResult;
 }
