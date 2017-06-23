@@ -22,7 +22,6 @@
  * Author: Mark Lobodzinski <mark@lunarg.com>
  * Author: David Pinedo <david@lunarg.com>
  */
-#define NOMINMAX
 #include <stdbool.h>
 #include <algorithm>
 #include <unordered_map>
@@ -3457,37 +3456,6 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSetWithTem
     // TODO: We're saving all the data, from pData to the end of the last item, including data before offset and skipped data.
     // This could be optimized to save only the data chunks that are actually needed.
     dataSize = getDescriptorSetDataSize(descriptorUpdateTemplate);
-#if 0
-
-    for (uint32_t i = 0; i < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->descriptorUpdateEntryCount; i++) {
-        for (uint32_t j = 0; j < descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorCount; j++) {
-            size_t thisSize;
-            switch (descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].descriptorType) {
-                case VK_DESCRIPTOR_TYPE_SAMPLER:
-                case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-                case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorImageInfo);
-                    break;
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
-                case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkDescriptorBufferInfo);
-                    break;
-                case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
-                case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
-                    thisSize = descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].offset + j * descriptorUpdateTemplateCreateInfo[descriptorUpdateTemplate]->pDescriptorUpdateEntries[i].stride + sizeof(VkBufferView);
-                    break;
-                default:
-                    assert(0);
-                    break;
-            }
-            dataSize = max(dataSize, thisSize);
-        }
-    }
-#endif
 
     CREATE_TRACE_PACKET(vkUpdateDescriptorSetWithTemplateKHR, dataSize);
     mdd(device)->devTable.UpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
