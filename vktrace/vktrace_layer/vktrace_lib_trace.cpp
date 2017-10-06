@@ -48,8 +48,7 @@
 #include "vktrace_lib_pageguardcapture.h"
 #include "vktrace_lib_pageguard.h"
 
-// Intentionally include the struct_size source file
-#include "vk_struct_size_helper.c"
+#include "vk_struct_size_helper.h"
 
 VKTRACER_LEAVE _Unload(void) {
     // only do the hooking and networking if the tracer is NOT loaded by vktrace

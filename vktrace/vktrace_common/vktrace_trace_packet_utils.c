@@ -41,6 +41,7 @@
 #include <mach/mach.h>
 #endif
 
+#include "vk_struct_size_helper.c"
 #include "vktrace_pageguard_memorycopy.h"
 
 static VKTRACE_CRITICAL_SECTION s_packet_index_lock;
@@ -251,6 +252,23 @@ void vktrace_finalize_buffer_address(vktrace_trace_packet_header* pHeader, void*
         uint64_t offset = (uint64_t)*ptr_address - (uint64_t)(pHeader->pBody);
         *ptr_address = (void*)offset;
     }
+}
+
+
+void vktrace_add_pnext_buffers_to_trace_packet(vktrace_trace_packet_header* pHeader, void **ppOut, const void *pIn) {
+    void **ppOutNext;
+
+    while (pIn) {
+        vktrace_add_buffer_to_trace_packet(pHeader, ppOut, get_struct_size(pIn), pIn);
+        ppOutNext = (void **)&(((VkApplicationInfo *)*ppOut)->pNext);
+        vktrace_finalize_buffer_address(pHeader, ppOut);
+        ppOut = ppOutNext;
+        pIn = (void*)(((VkApplicationInfo *)pIn)->pNext);
+    }
+
+    // TODO: Call this func from some manual functions?
+    // TODO: Can this func replace add_alloc_memory_to_trace_packet? (and other like it?
+    // TODO: verify packets can be played back
 }
 
 void vktrace_set_packet_entrypoint_end_time(vktrace_trace_packet_header* pHeader) {

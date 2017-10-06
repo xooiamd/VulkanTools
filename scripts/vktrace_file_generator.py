@@ -1453,7 +1453,10 @@ class VkTraceFileOutputGenerator(OutputGenerator):
         for p in params:
             # First handle custom cases
             # TODO: Look for extension = CORE here?  This is kludgy.
-            if (p.name in ['pCreateInfo', 'pSetLayoutInfoList', 'pBeginInfo', 'pAllocateInfo'] and 'khr' not in p.type.lower() and 'lunarg' not in p.type.lower() and 'ext' not in p.type.lower() ) or (p.name in ['pReserveSpaceInfo', 'pFeatures', 'pLimits'] and 'nvx' in p.type.lower()):
+            # TODO: Look at this restriction here... why the khr and ext for exclusions?? ALSO CHECK REPLAY
+            if ((p.name in ['pCreateInfo', 'pBeginInfo', 'pAllocateInfo'] and 'khr' not in p.type.lower() and 'ext' not in p.type.lower())
+                or (p.name in ['pReserveSpaceInfo', 'pFeatures', 'pLimits'] and 'nvx' in p.type.lower())
+                or ((p.name in ['pFeatures'] and '2khr' in p.type.lower()))):
                 ps.append('get_struct_chain_size((void*)%s)' % (p.name))
                 skip_list.append(p.name)
             elif p.name in custom_size_dict:
@@ -2429,6 +2432,19 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                 trace_vk_src += '\n'
                 for pp_dict in ptr_packet_update_list: # buff_ptr_indices:
                     trace_vk_src += '    %s;\n' % (pp_dict['add_txt'])
+                    # TODO: Add calls to vktrace_add_pnext_buffers_to_trace_packet to manually written trace funcs
+                    if '(pPacket->pCreateInfo)' in pp_dict['add_txt']:
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo), (void *)pCreateInfo->pNext);\n'
+                    if '(pPacket->pBeginInfo)' in pp_dict['add_txt']:
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pBeginInfo), (void *)pBeginInfo->pNext);\n'
+                    if '(pPacket->pAllocateInfo)' in pp_dict['add_txt']:
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo), (void *)pAllocateInfo->pNext);\n'
+                    if '(pPacket->pReserveSpaceInfo)' in pp_dict['add_txt']:
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pReserveSpaceInfo), (void *)pReserveSpaceInfo->pNext);\n'
+                    if '(pPacket->pLimits)' in pp_dict['add_txt']:
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pLimits), (void *)pLimits->pNext);\n'
+                    if ('(pPacket->pFeatures)' in pp_dict['add_txt'] and ('KHR' in pp_dict['add_txt'] or ('NVX' in pp_dict['add_txt']))):
+                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pFeatures), (void *)pFeatures->pNext);\n'
                 if 'void' not in resulttype or '*' in resulttype:
                     trace_vk_src += '    pPacket->result = result;\n'
                 for pp_dict in ptr_packet_update_list:
