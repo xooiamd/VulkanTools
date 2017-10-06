@@ -399,6 +399,7 @@ class HelperFileOutputGenerator(OutputGenerator):
     def GenerateStructSizeHeader(self):
         outstring = ''
         outstring += 'size_t get_struct_chain_size(const void* struct_ptr);\n'
+        outstring += 'size_t get_struct_size(const void* struct_ptr);\n'
         for item in self.structMembers:
             lower_case_name = item.name.lower()
             if item.ifdef_protect != None:
@@ -580,6 +581,7 @@ class HelperFileOutputGenerator(OutputGenerator):
                         safe_struct_header += '%s;\n' % member.cdecl
                 safe_struct_header += '    safe_%s(const %s* in_struct);\n' % (item.name, item.name)
                 safe_struct_header += '    safe_%s(const safe_%s& src);\n' % (item.name, item.name)
+                safe_struct_header += '    safe_%s& operator=(const safe_%s& src);\n' % (item.name, item.name)
                 safe_struct_header += '    safe_%s();\n' % item.name
                 safe_struct_header += '    ~safe_%s();\n' % item.name
                 safe_struct_header += '    void initialize(const %s* in_struct);\n' % item.name
@@ -904,7 +906,9 @@ class HelperFileOutputGenerator(OutputGenerator):
             copy_construct_txt = construct_txt.replace(' (in_struct->', ' (src.')     # Exclude 'if' blocks from next line
             copy_construct_txt = copy_construct_txt.replace('(in_struct->', '(*src.') # Pass object to copy constructors
             copy_construct_txt = copy_construct_txt.replace('in_struct->', 'src.')    # Modify remaining struct refs for src object
+            copy_assign_txt = '    if (&src == this) return *this;\n\n' + destruct_txt + '\n' + copy_construct_init + copy_construct_txt + '\n    return *this;'
             safe_struct_body.append("\n%s::%s(const %s& src)\n{\n%s%s}" % (ss_name, ss_name, ss_name, copy_construct_init, copy_construct_txt)) # Copy constructor
+            safe_struct_body.append("\n%s& %s::operator=(const %s& src)\n{\n%s\n}" % (ss_name, ss_name, ss_name, copy_assign_txt)) # Copy assignment operator
             safe_struct_body.append("\n%s::~%s()\n{\n%s}" % (ss_name, ss_name, destruct_txt))
             safe_struct_body.append("\nvoid %s::initialize(const %s* in_struct)\n{\n%s%s}" % (ss_name, item.name, init_func_txt, construct_txt))
             # Copy initializer uses same txt as copy constructor but has a ptr and not a reference
