@@ -1360,10 +1360,19 @@ static void demo_prepare_buffers(struct demo *demo) {
 }
 
 static void demo_prepare_depth(struct demo *demo) {
+
+    const VkImageFormatListCreateInfoKHR flist =  {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR,
+        .pNext = NULL,
+        .viewFormatCount=0,
+        .pViewFormats=NULL
+    };
+
+
     const VkFormat depth_format = VK_FORMAT_D16_UNORM;
     const VkImageCreateInfo image = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-        .pNext = NULL,
+        .pNext = &flist,
         .imageType = VK_IMAGE_TYPE_2D,
         .format = depth_format,
         .extent = {demo->width, demo->height, 1},
@@ -3871,6 +3880,10 @@ static void demo_init(struct demo *demo, int argc, char **argv) {
     vec3 origin = {0, 0, 0};
     vec3 up = {0.0f, 1.0f, 0.0};
 
+    static void *d1;
+    d1=(void*)getenv("D1");
+    while (d1)
+        d1=d1;
     memset(demo, 0, sizeof(*demo));
     demo->presentMode = VK_PRESENT_MODE_FIFO_KHR;
     demo->frameCount = INT32_MAX;
