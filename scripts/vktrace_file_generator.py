@@ -1386,15 +1386,6 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                                                      'finalize_txt': 'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfo->pSetLayouts));\n'
                                                                      'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfo->pPushConstantRanges));\n'
                                                                      'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfo))'},
-                           'VkMemoryAllocateInfo': {'add_txt': 'vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo), sizeof(VkMemoryAllocateInfo), pAllocateInfo);\n'
-                                                            '    add_alloc_memory_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo->pNext), pAllocateInfo->pNext)',
-                                            'finalize_txt': 'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pAllocateInfo))'},
-#                          'VkGraphicsPipelineCreateInfo': {'add_txt': 'vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfos), count*sizeof(VkGraphicsPipelineCreateInfo), pCreateInfos);\n'
-#                                                                      '    add_VkGraphicsPipelineCreateInfos_to_trace_packet(pHeader, (VkGraphicsPipelineCreateInfo*)pPacket->pCreateInfos, pCreateInfos, count)',
-#                                                      'finalize_txt': 'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfos))'},
-#                          'VkComputePipelineCreateInfo': {'add_txt': 'vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfos), count*sizeof(VkComputePipelineCreateInfo), pCreateInfos);\n'
-#                                                                      '    add_VkComputePipelineCreateInfos_to_trace_packet(pHeader, (VkComputePipelineCreateInfo*)pPacket->pCreateInfos, pCreateInfos, count)',
-#                                                      'finalize_txt': 'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfos))'},
                            'VkDescriptorPoolCreateInfo': {'add_txt': 'vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkDescriptorPoolCreateInfo), pCreateInfo);\n'
                                                                      '    vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pPoolSizes), pCreateInfo->poolSizeCount * sizeof(VkDescriptorPoolSize), pCreateInfo->pPoolSizes)',
                                                      'finalize_txt': 'vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pCreateInfo->pPoolSizes));\n'
@@ -2432,19 +2423,19 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                 trace_vk_src += '\n'
                 for pp_dict in ptr_packet_update_list: # buff_ptr_indices:
                     trace_vk_src += '    %s;\n' % (pp_dict['add_txt'])
-                    # TODO: Add calls to vktrace_add_pnext_buffers_to_trace_packet to manually written trace funcs
+                    # TODO: Add calls to vktrace_add_pnext_structs_to_trace_packet to manually written trace funcs
                     if '(pPacket->pCreateInfo)' in pp_dict['add_txt']:
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo), (void *)pCreateInfo->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo), (void *)pCreateInfo->pNext);\n'
                     if '(pPacket->pBeginInfo)' in pp_dict['add_txt']:
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pBeginInfo), (void *)pBeginInfo->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pBeginInfo), (void *)pBeginInfo->pNext);\n'
                     if '(pPacket->pAllocateInfo)' in pp_dict['add_txt']:
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo), (void *)pAllocateInfo->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo), (void *)pAllocateInfo->pNext);\n'
                     if '(pPacket->pReserveSpaceInfo)' in pp_dict['add_txt']:
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pReserveSpaceInfo), (void *)pReserveSpaceInfo->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pReserveSpaceInfo), (void *)pReserveSpaceInfo->pNext);\n'
                     if '(pPacket->pLimits)' in pp_dict['add_txt']:
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pLimits), (void *)pLimits->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pLimits), (void *)pLimits->pNext);\n'
                     if ('(pPacket->pFeatures)' in pp_dict['add_txt'] and ('KHR' in pp_dict['add_txt'] or ('NVX' in pp_dict['add_txt']))):
-                        trace_vk_src += '    vktrace_add_pnext_buffers_to_trace_packet(pHeader, (void **)&(pPacket->pFeatures), (void *)pFeatures->pNext);\n'
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pFeatures), (void *)pFeatures->pNext);\n'
                 if 'void' not in resulttype or '*' in resulttype:
                     trace_vk_src += '    pPacket->result = result;\n'
                 for pp_dict in ptr_packet_update_list:
@@ -2716,10 +2707,18 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             '    pPacket->header = NULL;\n',
                             '}\n',
                             '}\n']
+        interpret_pcreateinfo_pnext_ptrs = ('        VkApplicationInfo *pNext = (VkApplicationInfo*)pPacket->pCreateInfo; // TODO: Make this a func??  //@@1\n' +
+                                           '         do {\n' +
+                                           '             void** ppNextVoidPtr = (void**)&(pNext->pNext);\n' +
+                                           '             *ppNextVoidPtr = (void*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext->pNext);\n' +
+                                           '             pNext = (VkApplicationInfo*)pNext->pNext;\n' +
+                                           '         } while (pNext);\n')
+
         # TODO : This code is now too large and complex, need to make codegen smarter for pointers embedded in struct params to handle those cases automatically
         custom_case_dict = { 'CreateRenderPass' : {'param': 'pCreateInfo', 'txt': create_rp_interp},
                              'CreatePipelineCache' : {'param': 'pCreateInfo', 'txt': [
-                                                       '((VkPipelineCacheCreateInfo *)pPacket->pCreateInfo)->pInitialData = (const void*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pInitialData);\n']},
+                                                       '((VkPipelineCacheCreateInfo *)pPacket->pCreateInfo)->pInitialData = (const void*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pInitialData);\n'+
+                                                       interpret_pcreateinfo_pnext_ptrs]},
                              'CreatePipelineLayout' : {'param': 'pCreateInfo', 'txt': ['VkPipelineLayoutCreateInfo* pInfo = (VkPipelineLayoutCreateInfo*)pPacket->pCreateInfo;\n',
                                                        'pInfo->pSetLayouts = (VkDescriptorSetLayout*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pSetLayouts);\n',
                                                        'pInfo->pPushConstantRanges = (VkPushConstantRange*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPushConstantRanges);\n']},
@@ -2823,9 +2822,9 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                                                                                           '*ppCV = (VkClearValue*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)(pPacket->pRenderPassBegin->pClearValues));']},
                              'CreateShaderModule' : {'param': 'pCreateInfo', 'txt': ['void** ppCode = (void**)&(pPacket->pCreateInfo->pCode);\n',
                                                                                      '*ppCode = (void*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pCode);']},
-                             'CreateImage' : {'param': 'pCreateInfo', 'txt': ['uint32_t** ppQueueFamilyIndices = (uint32_t**)&(pPacket->pCreateInfo->pQueueFamilyIndices);\n',
+                             'CreateImage' : {'param': 'pCreateInfo', 'txt': ['uint32_t** ppQueueFamilyIndices = (uint32_t**)&(pPacket->pCreateInfo->pQueueFamilyIndices); //@@2\n',
                                                                               '*ppQueueFamilyIndices = (uint32_t*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pQueueFamilyIndices);\n',
-                                                                              'VkImageCreateInfo *pNext = (VkImageCreateInfo*)pPacket->pCreateInfo;\n',
+                                                                              'VkImageCreateInfo *pNext = (VkImageCreateInfo*)pPacket->pCreateInfo; //@@3\n',
                                                                               'do {\n',
                                                                               '    void** ppNextVoidPtr = (void**)&(pNext->pNext);\n',
                                                                               '    *ppNextVoidPtr = (void*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext->pNext);\n',

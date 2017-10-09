@@ -255,7 +255,7 @@ void vktrace_finalize_buffer_address(vktrace_trace_packet_header* pHeader, void*
 }
 
 
-void vktrace_add_pnext_buffers_to_trace_packet(vktrace_trace_packet_header* pHeader, void **ppOut, const void *pIn) {
+void vktrace_add_pnext_structs_to_trace_packet(vktrace_trace_packet_header* pHeader, void **ppOut, const void *pIn) {
     void **ppOutNext;
 
     while (pIn) {
@@ -267,8 +267,6 @@ void vktrace_add_pnext_buffers_to_trace_packet(vktrace_trace_packet_header* pHea
     }
 
     // TODO: Call this func from some manual functions?
-    // TODO: Can this func replace add_alloc_memory_to_trace_packet? (and other like it?
-    // TODO: verify packets can be played back
 }
 
 void vktrace_set_packet_entrypoint_end_time(vktrace_trace_packet_header* pHeader) {
