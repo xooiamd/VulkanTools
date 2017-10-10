@@ -1961,14 +1961,18 @@ VkResult vkReplay::manually_replay_vkAllocateMemory(packet_vkAllocateMemory *pPa
         return VK_ERROR_VALIDATION_FAILED_EXT;
     }
 
-    if (pPacket->pAllocateInfo->pNext) {
-        VkDedicatedAllocationMemoryAllocateInfoNV *x = (VkDedicatedAllocationMemoryAllocateInfoNV *)(pPacket->pAllocateInfo->pNext);
-
-        if (x->sType == VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_MEMORY_ALLOCATE_INFO_NV) {
-            x->image = m_objMapper.remap_images(x->image);
-            x->buffer = m_objMapper.remap_buffers(x->buffer);
-            if (!(x->image == VK_NULL_HANDLE || x->buffer == VK_NULL_HANDLE))
-                vktrace_LogError("Invalid handle in vkAllocateMemory pAllocate->pNext structure.");
+    if (pPacket->pAllocateInfo) {
+        vktrace_interpret_pnext_pointers(pPacket->header, (void *)pPacket->pAllocateInfo);
+        const void *pNext = pPacket->pAllocateInfo->pNext;
+        while (pNext) {
+            VkDedicatedAllocationMemoryAllocateInfoNV *x = (VkDedicatedAllocationMemoryAllocateInfoNV *)(pPacket->pAllocateInfo->pNext);
+            if (x->sType == VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_MEMORY_ALLOCATE_INFO_NV) {
+                x->image = m_objMapper.remap_images(x->image);
+                x->buffer = m_objMapper.remap_buffers(x->buffer);
+                if (!(x->image == VK_NULL_HANDLE || x->buffer == VK_NULL_HANDLE))
+                    vktrace_LogError("Invalid handle in vkAllocateMemory pAllocate->pNext structure.");
+            }
+            pNext = x->pNext;
         }
     }
 

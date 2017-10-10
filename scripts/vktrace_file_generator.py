@@ -2677,14 +2677,9 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             'pNonConst->pViewportState = (const VkPipelineViewportStateCreateInfo*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfos[i].pViewportState);\n',
                             '// Raster State\n',
                             'pNonConst->pRasterizationState = (const VkPipelineRasterizationStateCreateInfo*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfos[i].pRasterizationState);\n',
-                            'if (pNonConst->pRasterizationState->pNext !=\n',
-                            '    nullptr) {  // pNext point to an extsnsion struct, we need to interpret the pointer\n',
-                            '    // here we use a non-const reference to change the value of\n',
-                            '    // pNonConst->pRasterizationState->pNext\n',
-                            '    void*& pNext = const_cast<void*&>(pNonConst->pRasterizationState->pNext);\n',
-                            '    pNext = vktrace_trace_packet_interpret_buffer_pointer(pHeader,\n',
-                            '                                                          (intptr_t)pPacket->pCreateInfos[i].pRasterizationState->pNext);\n',
-                            '}\n',
+                            'vktrace_interpret_pnext_pointers(pHeader, (void *)pNonConst->pRasterizationState);\n',
+
+
                             '// MultiSample State\n',
                             'pNonConst->pMultisampleState = (const VkPipelineMultisampleStateCreateInfo*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfos[i].pMultisampleState);\n',
                             '// DepthStencil State\n',
@@ -2707,18 +2702,13 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             '    pPacket->header = NULL;\n',
                             '}\n',
                             '}\n']
-        interpret_pcreateinfo_pnext_ptrs = ('        VkApplicationInfo *pNext = (VkApplicationInfo*)pPacket->pCreateInfo; // TODO: Make this a func??  //@@1\n' +
-                                           '         do {\n' +
-                                           '             void** ppNextVoidPtr = (void**)&(pNext->pNext);\n' +
-                                           '             *ppNextVoidPtr = (void*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext->pNext);\n' +
-                                           '             pNext = (VkApplicationInfo*)pNext->pNext;\n' +
-                                           '         } while (pNext);\n')
 
         # TODO : This code is now too large and complex, need to make codegen smarter for pointers embedded in struct params to handle those cases automatically
         custom_case_dict = { 'CreateRenderPass' : {'param': 'pCreateInfo', 'txt': create_rp_interp},
                              'CreatePipelineCache' : {'param': 'pCreateInfo', 'txt': [
                                                        '((VkPipelineCacheCreateInfo *)pPacket->pCreateInfo)->pInitialData = (const void*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pInitialData);\n'+
-                                                       interpret_pcreateinfo_pnext_ptrs]},
+                                                       '        vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);']},
+                                                       #TODO ADD THE ABOVE TO THE REST OF THIS CASES
                              'CreatePipelineLayout' : {'param': 'pCreateInfo', 'txt': ['VkPipelineLayoutCreateInfo* pInfo = (VkPipelineLayoutCreateInfo*)pPacket->pCreateInfo;\n',
                                                        'pInfo->pSetLayouts = (VkDescriptorSetLayout*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pSetLayouts);\n',
                                                        'pInfo->pPushConstantRanges = (VkPushConstantRange*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPushConstantRanges);\n']},

@@ -333,3 +333,16 @@ void* vktrace_trace_packet_interpret_buffer_pointer(vktrace_trace_packet_header*
     buffer_location = (char*)(pHeader->pBody) + offset;
     return buffer_location;
 }
+
+void vktrace_interpret_pnext_pointers(vktrace_trace_packet_header* pHeader, void* struct_ptr)
+{
+    VkApplicationInfo *pNext;
+    if (!struct_ptr)
+        return;
+    pNext = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
+    while (pNext) {
+        VkApplicationInfo **ppNext = (void *)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext);
+        pNext = (VkApplicationInfo *)((VkApplicationInfo*)ppNext)->pNext;
+    }
+
+}

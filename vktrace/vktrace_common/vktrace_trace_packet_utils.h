@@ -113,6 +113,9 @@ vktrace_trace_packet_header* vktrace_read_trace_packet(FileLike* pFile);
 // converts a pointer variable that is currently byte offset into a pointer to the actual offset location
 void* vktrace_trace_packet_interpret_buffer_pointer(vktrace_trace_packet_header* pHeader, intptr_t ptr_variable);
 
+// converts the Vulkan struct pnext chain that is currently byte offsets into pointers
+void vktrace_interpret_pnext_pointers(vktrace_trace_packet_header* pHeader, void *struct_ptr);
+
 //=============================================================================
 // trace packet message
 // Interpretting a trace_packet_message should be done only when:
