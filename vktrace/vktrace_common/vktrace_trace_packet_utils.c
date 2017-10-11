@@ -336,13 +336,12 @@ void* vktrace_trace_packet_interpret_buffer_pointer(vktrace_trace_packet_header*
 
 void vktrace_interpret_pnext_pointers(vktrace_trace_packet_header* pHeader, void* struct_ptr)
 {
-    VkApplicationInfo *pNext;
     if (!struct_ptr)
         return;
-    pNext = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
-    while (pNext) {
-        VkApplicationInfo **ppNext = (void *)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext);
-        pNext = (VkApplicationInfo *)((VkApplicationInfo*)ppNext)->pNext;
-    }
 
+    while (((VkApplicationInfo *)struct_ptr)->pNext) {
+        VkApplicationInfo *pNext = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
+        (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext = (void *)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext);
+        struct_ptr = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
+    }
 }
