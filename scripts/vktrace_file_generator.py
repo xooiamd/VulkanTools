@@ -1443,11 +1443,9 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             }
         for p in params:
             # First handle custom cases
-            # TODO: Look for extension = CORE here?  This is kludgy.
-            # TODO: Look at this restriction here... why the khr and ext for exclusions?? ALSO CHECK REPLAY
-            if ((p.name in ['pCreateInfo', 'pBeginInfo', 'pAllocateInfo'] and 'khr' not in p.type.lower() and 'ext' not in p.type.lower())
-                or (p.name in ['pReserveSpaceInfo', 'pFeatures', 'pLimits'] and 'nvx' in p.type.lower())
-                or ((p.name in ['pFeatures'] and '2khr' in p.type.lower()))):
+            if ((p.name in ['pCreateInfo', 'pBeginInfo', 'pAllocateInfo','pReserveSpaceInfo','pLimits','pExternalBufferInfo','pExternalBufferProperties','pGetFdInfo','pMemoryFdProperties','pExternalSemaphoreProperties','pExternalSemaphoreInfo','pImportSemaphoreFdInfo','pDescriptorWrites','pExternalFenceInfo','pExternalFenceProperties','pSurfaceCapabilities','pSurfaceInfo', 'pTagInfo','pNameInfo','pMarkerInfo','pDeviceGroupPresentCapabilities','pAcquireInfo','pPhysicalDeviceGroupProperties','pDisplayPowerInfo','pDeviceEventInfo','pDisplayEventInfo','pMetadata'])
+                or (p.name in ['pFeatures'] and 'nvx' in p.type.lower())
+                or (p.name in ['pFeatures', 'pProperties', 'pFormatProperties','pImageFormatInfo','pImageFormatProperties','pQueueFamilyProperties','pMemoryProperties','pFormatInfo','pSurfaceFormats','pMemoryRequirements','pInfo','pSparseMemoryRequirements'] and '2khr' in p.type.lower())):
                 ps.append('get_struct_chain_size((void*)%s)' % (p.name))
                 skip_list.append(p.name)
             elif p.name in custom_size_dict:
