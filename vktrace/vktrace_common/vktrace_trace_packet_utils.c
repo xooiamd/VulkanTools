@@ -254,19 +254,36 @@ void vktrace_finalize_buffer_address(vktrace_trace_packet_header* pHeader, void*
     }
 }
 
-
 void vktrace_add_pnext_structs_to_trace_packet(vktrace_trace_packet_header* pHeader, void **ppOut, const void *pIn) {
     void **ppOutNext;
-
     while (pIn) {
         vktrace_add_buffer_to_trace_packet(pHeader, ppOut, get_struct_size(pIn), pIn);
-        ppOutNext = (void **)&(((VkApplicationInfo *)*ppOut)->pNext);
         vktrace_finalize_buffer_address(pHeader, ppOut);
+        switch (((VkApplicationInfo *)*ppOut)->sType) {
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO_KHX: {
+            auto pSrc = ((VkDeviceGroupDeviceCreateInfoKHX *)pIn)->pPhysicalDevices;
+            auto pDst = &((VkDeviceGroupDeviceCreateInfoKHX *)*ppOut)->pPhysicalDevices;
+            auto count = ((VkDeviceGroupDeviceCreateInfoKHX *)*ppOut)->physicalDeviceCount;
+            vktrace_add_buffer_to_trace_packet(pHeader, pDst, sizeof(VkPhysicalDevice) * count, pSrc);
+            vktrace_finalize_buffer_address(pHeader, pDst);
+            }
+            break;
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO: {
+            auto pSrc = ((VkDescriptorSetLayoutCreateInfo *)pIn)->pBindings;
+            auto pDst = &((VkDescriptorSetLayoutCreateInfo *)*ppOut)->pBindings;
+            auto count = ((VkDescriptorSetLayoutCreateInfo *)*ppOut)->bindingCount;
+            vktrace_add_buffer_to_trace_packet(pHeader, pDst, sizeof(VkDescriptorSetLayoutBinding) * count, pSrc);
+            vktrace_finalize_buffer_address(pHeader, pDst);
+            }
+            break;
+        default:
+            vktrace_LogError("Unrecognized pNext structure");
+            break;
+        }
+        ppOutNext = (void **)&(((VkApplicationInfo *)*ppOut)->pNext);
         ppOut = ppOutNext;
         pIn = (void*)(((VkApplicationInfo *)pIn)->pNext);
     }
-
-    // TODO: Call this func from some manual functions?
 }
 
 void vktrace_set_packet_entrypoint_end_time(vktrace_trace_packet_header* pHeader) {
