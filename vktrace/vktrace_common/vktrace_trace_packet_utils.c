@@ -342,6 +342,21 @@ void vktrace_interpret_pnext_pointers(vktrace_trace_packet_header* pHeader, void
     while (((VkApplicationInfo *)struct_ptr)->pNext) {
         VkApplicationInfo *pNext = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
         (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext = (void *)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext);
+
+        // Convert pointers in pNext structures
+        switch (((VkApplicationInfo *)(((VkApplicationInfo *)struct_ptr)->pNext))->sType) {
+        case  VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO:
+            VkDescriptorSetLayoutCreateInfo* struct_ptr_cur = (VkDescriptorSetLayoutCreateInfo*)pNext;
+            struct_ptr_cur->pBindings = (VkDescriptorSetLayoutBinding*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)struct_ptr_cur->pBindings);
+            for (auto i = 0; i < struct_ptr_cur->bindingCount; i++) {
+                VkSampler** ppSamplers = (VkSampler**)&(struct_ptr_cur->pBindings[i].pImmutableSamplers);
+                *ppSamplers = (VkSampler*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)struct_ptr_cur->pBindings[i].pImmutableSamplers);
+            }
+        default:
+            vktrace_LogError("Unrecognized pNext structure in trace packet");
+            break;
+        }
+
         struct_ptr = (VkApplicationInfo *)((VkApplicationInfo *)struct_ptr)->pNext;
     }
 }

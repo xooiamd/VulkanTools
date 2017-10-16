@@ -2421,7 +2421,6 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                 trace_vk_src += '\n'
                 for pp_dict in ptr_packet_update_list: # buff_ptr_indices:
                     trace_vk_src += '    %s;\n' % (pp_dict['add_txt'])
-                    # TODO: Add calls to vktrace_add_pnext_structs_to_trace_packet to manually written trace funcs
                     if '(pPacket->pCreateInfo)' in pp_dict['add_txt']:
                         trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo), (void *)pCreateInfo->pNext);\n'
                     if '(pPacket->pBeginInfo)' in pp_dict['add_txt']:
@@ -2434,6 +2433,8 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                         trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pLimits), (void *)pLimits->pNext);\n'
                     if ('(pPacket->pFeatures)' in pp_dict['add_txt'] and ('KHR' in pp_dict['add_txt'] or ('NVX' in pp_dict['add_txt']))):
                         trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pFeatures), (void *)pFeatures->pNext);\n'
+                    if ('(pPacket->pSurfaceInfo)' in pp_dict['add_txt'] and ('2KHR' in pp_dict['add_txt'])):
+                        trace_vk_src += '    vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pSurfaceInfo), (void *)pSurfaceInfo->pNext);\n'
                 if 'void' not in resulttype or '*' in resulttype:
                     trace_vk_src += '    pPacket->result = result;\n'
                 for pp_dict in ptr_packet_update_list:
@@ -2622,13 +2623,6 @@ class VkTraceFileOutputGenerator(OutputGenerator):
 
         # Custom txt for given function and parameter.  First check if param is NULL, then insert txt if not
         # First some common code used by both CmdWaitEvents & CmdPipelineBarrier
-        mem_barrier_interp = ['uint32_t i = 0;\n',
-                              'for (i = 0; i < pPacket->memoryBarrierCount; i++) {\n',
-                              '    void** ppMB = (void**)&(pPacket->ppMemoryBarriers[i]);\n',
-                              '    *ppMB = vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->ppMemoryBarriers[i]);\n',
-                              '    //VkMemoryBarrier* pBarr = (VkMemoryBarrier*)pPacket->ppMemoryBarriers[i];\n',
-                              '    // TODO : Could fix up the pNext ptrs here if they were finalized and if we cared by switching on Barrier type and remapping\n',
-                              '}']
         create_rp_interp = ['VkRenderPassCreateInfo* pInfo = (VkRenderPassCreateInfo*)pPacket->pCreateInfo;\n',
                             'uint32_t i = 0;\n',
                             'VkAttachmentDescription **ppAD = (VkAttachmentDescription **)&(pInfo->pAttachments);\n',
@@ -2648,7 +2642,9 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             '    *pAR = (VkAttachmentReference*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pInfo->pSubpasses[i].pPreserveAttachments);\n',
                             '}\n',
                             'VkSubpassDependency** ppSD = (VkSubpassDependency**)&(pInfo->pDependencies);\n',
-                            '*ppSD = (VkSubpassDependency*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pInfo->pDependencies);\n']
+                            '*ppSD = (VkSubpassDependency*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pInfo->pDependencies);\n',
+                            'vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);\n',
+                            ]
         create_gfx_pipe = ['uint32_t i;\n',
                            'uint32_t j;\n',
                            'for (i=0; i<pPacket->createInfoCount; i++) {\n',
@@ -2706,33 +2702,14 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                              'CreatePipelineCache' : {'param': 'pCreateInfo', 'txt': [
                                                        '((VkPipelineCacheCreateInfo *)pPacket->pCreateInfo)->pInitialData = (const void*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pInitialData);\n'+
                                                        '        vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);']},
-                                                       #TODO ADD THE ABOVE TO THE REST OF THIS CASES
                              'CreatePipelineLayout' : {'param': 'pCreateInfo', 'txt': ['VkPipelineLayoutCreateInfo* pInfo = (VkPipelineLayoutCreateInfo*)pPacket->pCreateInfo;\n',
                                                        'pInfo->pSetLayouts = (VkDescriptorSetLayout*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pSetLayouts);\n',
-                                                       'pInfo->pPushConstantRanges = (VkPushConstantRange*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPushConstantRanges);\n']},
+                                                       'pInfo->pPushConstantRanges = (VkPushConstantRange*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPushConstantRanges);\n',
+                                                       'vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);']},
                              'CreateDescriptorPool' : {'param': 'pCreateInfo', 'txt': ['VkDescriptorPoolCreateInfo* pInfo = (VkDescriptorPoolCreateInfo*)pPacket->pCreateInfo;\n',
-                                                       'pInfo->pPoolSizes = (VkDescriptorPoolSize*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPoolSizes);\n']},
-                             'CmdWaitEvents' : {'param': 'ppMemoryBarriers', 'txt': mem_barrier_interp},
-                             'CmdPipelineBarrier' : {'param': 'ppMemoryBarriers', 'txt': mem_barrier_interp},
-                             'CreateDescriptorSetLayout' : {'param': 'pCreateInfo', 'txt': ['if (pPacket->pCreateInfo->sType == VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO) {\n',
-                                                                                         '    vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);\n',    # DO THIS ON OTHER ENTRIES IN THIS TBL?
-                                                                                         '    VkDescriptorSetLayoutCreateInfo* pNext = (VkDescriptorSetLayoutCreateInfo*)pPacket->pCreateInfo;\n',
-                                                                                         '    while (pNext) {\n',
-                                                                                         '        if (pNext->sType == VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO) {\n',
-                                                                                         '                unsigned int i = 0;\n',
-                                                                                         '                pNext->pBindings = (VkDescriptorSetLayoutBinding*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext->pBindings);\n',
-                                                                                         '                for (i = 0; i < pNext->bindingCount; i++)\n','                {\n',
-                                                                                         '                    VkSampler** ppSamplers = (VkSampler**)&(pNext->pBindings[i].pImmutableSamplers);\n',
-                                                                                         '                    *ppSamplers = (VkSampler*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pNext->pBindings[i].pImmutableSamplers);\n',
-                                                                                         '                }\n',
-                                                                                         '        }\n',
-                                                                                         '        pNext = (VkDescriptorSetLayoutCreateInfo*)pNext->pNext;\n',
-                                                                                         '     }\n',
-                                                                                         '} else {\n',
-                                                                                         '     // This is unexpected.\n',
-                                                                                         '     vktrace_LogError("CreateDescriptorSetLayout must have pCreateInfo->stype of VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO.");\n',
-                                                                                         '     pPacket->header = NULL;\n',
-                                                                                         '}']},
+                                                       'pInfo->pPoolSizes = (VkDescriptorPoolSize*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPoolSizes);\n',
+                                                       'vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);']},
+                                                       #TODO ADD THE vktrace_interpret_pnext_pointers calls to the rest of these cases
                              'BeginCommandBuffer' : {'param': 'pBeginInfo', 'txt': [
                                                                                          'VkCommandBufferBeginInfo* pInfo = (VkCommandBufferBeginInfo*) pPacket->pBeginInfo;\n',
                                                                                          '    vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pBeginInfo);\n',
