@@ -2709,7 +2709,6 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                              'CreateDescriptorPool' : {'param': 'pCreateInfo', 'txt': ['VkDescriptorPoolCreateInfo* pInfo = (VkDescriptorPoolCreateInfo*)pPacket->pCreateInfo;\n',
                                                        'pInfo->pPoolSizes = (VkDescriptorPoolSize*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pPoolSizes);\n',
                                                        'vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pCreateInfo);']},
-                                                       #TODO ADD THE vktrace_interpret_pnext_pointers calls to the rest of these cases
                              'BeginCommandBuffer' : {'param': 'pBeginInfo', 'txt': [
                                                                                          'VkCommandBufferBeginInfo* pInfo = (VkCommandBufferBeginInfo*) pPacket->pBeginInfo;\n',
                                                                                          '    vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pBeginInfo);\n',
@@ -2723,7 +2722,9 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                                                                                          '}']},
                              'AllocateDescriptorSets' : {'param': 'pAllocateInfo', 'txt':
                                                                                ['VkDescriptorSetLayout **ppDescSetLayout = (VkDescriptorSetLayout **) &pPacket->pAllocateInfo->pSetLayouts;\n'
+                                                                                '        vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pAllocateInfo);\n',
                                                                                 '        *ppDescSetLayout = (VkDescriptorSetLayout *) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)(pPacket->pAllocateInfo->pSetLayouts));']},
+                                                       #TODO ADD THE vktrace_interpret_pnext_pointers calls to the rest of these cases
                              'UpdateDescriptorSets' : {'param': 'pDescriptorWrites', 'txt':
                                                                                [ 'uint32_t i;\n',
                                                                                  'for (i = 0; i < pPacket->descriptorWriteCount; i++) {\n',

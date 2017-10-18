@@ -3117,6 +3117,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkQueuePresentKHR(VkQueu
     pPacket = interpret_body_as_vkQueuePresentKHR(pHeader);
     pPacket->queue = queue;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo), sizeof(VkPresentInfoKHR), pPresentInfo);
+    if (pPresentInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pPresentInfo->pNext), pPresentInfo->pNext);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo->pSwapchains), swapchainSize,
                                        pPresentInfo->pSwapchains);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo->pImageIndices), indexSize,
