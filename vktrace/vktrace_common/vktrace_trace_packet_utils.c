@@ -258,7 +258,7 @@ void vktrace_finalize_buffer_address(vktrace_trace_packet_header* pHeader, void*
 #define AddPointerWithCountToTracebuffer(_sName, _sPtr, _sCount) \
     do { \
         void *pSrc = (void*)(((_sName *)pIn)->_sPtr); \
-        void **pDst = (void *)(&((_sName *)*ppOut)->_sPtr); \
+        void **pDst = (void **)&(((_sName *)*ppOut)->_sPtr); \
         uint32_t count = ((_sName *)*ppOut)->_sCount; \
         vktrace_add_buffer_to_trace_packet(pHeader, pDst, sizeof(_sName) * count, pSrc); \
         vktrace_finalize_buffer_address(pHeader, pDst); \

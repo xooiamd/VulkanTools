@@ -2698,6 +2698,8 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                             '}\n']
 
         # TODO : This code is now too large and complex, need to make codegen smarter for pointers embedded in struct params to handle those cases automatically
+        #TODO BUG! -- We call vktrace_interpret_pnext_pointers from here, then it gets called later in manual replay funcs.
+        #             And we don't call vktrace_interpret_pnext_pointers for all code funcs.
         custom_case_dict = { 'CreateRenderPass' : {'param': 'pCreateInfo', 'txt': create_rp_interp},
                              'CreatePipelineCache' : {'param': 'pCreateInfo', 'txt': [
                                                        '((VkPipelineCacheCreateInfo *)pPacket->pCreateInfo)->pInitialData = (const void*) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pCreateInfo->pInitialData);\n'+
@@ -2724,38 +2726,37 @@ class VkTraceFileOutputGenerator(OutputGenerator):
                                                                                ['VkDescriptorSetLayout **ppDescSetLayout = (VkDescriptorSetLayout **) &pPacket->pAllocateInfo->pSetLayouts;\n'
                                                                                 '        vktrace_interpret_pnext_pointers(pHeader, (void *)pPacket->pAllocateInfo);\n',
                                                                                 '        *ppDescSetLayout = (VkDescriptorSetLayout *) vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)(pPacket->pAllocateInfo->pSetLayouts));']},
-                                                       #TODO ADD THE vktrace_interpret_pnext_pointers calls to the rest of these cases
                              'UpdateDescriptorSets' : {'param': 'pDescriptorWrites', 'txt':
-                                                                               [ 'uint32_t i;\n',
-                                                                                 'for (i = 0; i < pPacket->descriptorWriteCount; i++) {\n',
-                                                                                 '    switch (pPacket->pDescriptorWrites[i].descriptorType) {',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_SAMPLER:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT: {',
+                                                                               [ 'uint32_t i;//\n',
+                                                                                 'for (i = 0; i < pPacket->descriptorWriteCount; i++) {//\n',
+                                                                                 '    switch (pPacket->pDescriptorWrites[i].descriptorType) {//\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_SAMPLER:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT: {\n',
                                                                                  '            VkDescriptorImageInfo** ppImageInfo = (VkDescriptorImageInfo**)&pPacket->pDescriptorWrites[i].pImageInfo;\n',
                                                                                  '            *ppImageInfo = (VkDescriptorImageInfo*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pDescriptorWrites[i].pImageInfo);\n',
                                                                                  '        }',
                                                                                  '        break;',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER: {',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER: {\n',
                                                                                  '            VkBufferView** ppTexelBufferView = (VkBufferView**)&pPacket->pDescriptorWrites[i].pTexelBufferView;\n',
                                                                                  '            *ppTexelBufferView = (VkBufferView*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pDescriptorWrites[i].pTexelBufferView);\n',
                                                                                  '        }',
                                                                                  '        break;',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:',
-                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC: {',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:\n',
+                                                                                 '    case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC: {\n',
                                                                                  '            VkDescriptorBufferInfo** ppBufferInfo = (VkDescriptorBufferInfo**)&pPacket->pDescriptorWrites[i].pBufferInfo;\n',
                                                                                  '            *ppBufferInfo = (VkDescriptorBufferInfo*)vktrace_trace_packet_interpret_buffer_pointer(pHeader, (intptr_t)pPacket->pDescriptorWrites[i].pBufferInfo);\n',
-                                                                                 '        }',
-                                                                                 '        break;',
-                                                                                 '    default:',
-                                                                                 '        break;',
-                                                                                 '    }',
-                                                                                 '}'
+                                                                                 '        }\n',
+                                                                                 '        break;\n',
+                                                                                 '    default:\n',
+                                                                                 '        break;\n',
+                                                                                 '    }\n',
+                                                                                 '}\n'
                                                                                ]},
                              'QueueSubmit' : {'param': 'pSubmits', 'txt':
                                                                                [ 'uint32_t i;\n',
