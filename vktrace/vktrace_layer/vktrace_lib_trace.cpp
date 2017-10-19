@@ -357,7 +357,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateMemory(VkDevic
     pPacket = interpret_body_as_vkAllocateMemory(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo), sizeof(VkMemoryAllocateInfo), pAllocateInfo);
-    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo->pNext), pAllocateInfo->pNext);
+    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pAllocateInfo, pAllocateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pMemory), sizeof(VkDeviceMemory), pMemory);
     pPacket->result = result;
@@ -791,7 +791,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateCommandBuffers
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo), sizeof(VkCommandBufferAllocateInfo),
                                        pAllocateInfo);
-    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo->pNext), pAllocateInfo->pNext);
+    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pAllocateInfo, (void *)pAllocateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCommandBuffers),
                                        sizeof(VkCommandBuffer) * pAllocateInfo->commandBufferCount, pCommandBuffers);
     pPacket->result = result;
@@ -835,7 +835,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkBeginCommandBuffer(VkC
     pPacket = interpret_body_as_vkBeginCommandBuffer(pHeader);
     pPacket->commandBuffer = commandBuffer;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBeginInfo), sizeof(VkCommandBufferBeginInfo), pBeginInfo);
-    if (pBeginInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pBeginInfo->pNext), pBeginInfo->pNext);
+    if (pBeginInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pBeginInfo, (void *)pBeginInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBeginInfo->pInheritanceInfo),
                                        sizeof(VkCommandBufferInheritanceInfo), pBeginInfo->pInheritanceInfo);
     pPacket->result = result;
@@ -877,7 +877,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateDescriptorPool(V
     pPacket = interpret_body_as_vkCreateDescriptorPool(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkDescriptorPoolCreateInfo), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, (void *)pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pPoolSizes),
                                        pCreateInfo->poolSizeCount * sizeof(VkDescriptorPoolSize), pCreateInfo->pPoolSizes);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
@@ -1080,7 +1080,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateFramebuffer(VkDe
     pPacket = interpret_body_as_vkCreateFramebuffer(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkFramebufferCreateInfo), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, (void *)pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pAttachments),
                                        attachmentCount * sizeof(VkImageView), pCreateInfo->pAttachments);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
@@ -1378,7 +1378,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateRenderPass(VkDev
     pPacket = interpret_body_as_vkCreateRenderPass(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkRenderPassCreateInfo), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pAttachments),
                                        attachmentCount * sizeof(VkAttachmentDescription), pCreateInfo->pAttachments);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pDependencies),
@@ -1719,7 +1719,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkAllocateDescriptorSets
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo), sizeof(VkDescriptorSetAllocateInfo),
                                        pAllocateInfo);
-    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pAllocateInfo->pNext), pAllocateInfo->pNext);
+    if (pAllocateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pAllocateInfo, pAllocateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocateInfo->pSetLayouts),
                                        pPacket->pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSetLayout),
                                        pAllocateInfo->pSetLayouts);
@@ -2066,7 +2066,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkUpdateDescriptorSets(VkDev
             default:
                 break;
         }
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pDescriptorWrites[i].pNext), pDescriptorWrites[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pDescriptorWrites + i), pDescriptorWrites + i);
     }
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pDescriptorWrites));
 
@@ -2193,7 +2193,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkQueueSubmit(VkQueue qu
     pPacket->result = result;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pSubmits), submitCount * sizeof(VkSubmitInfo), pSubmits);
     for (uint32_t i = 0; i < submitCount; ++i) {
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pSubmits[i].pNext), pSubmits[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pSubmits + i), pSubmits + i);
         vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pSubmits[i].pCommandBuffers),
                                            pPacket->pSubmits[i].commandBufferCount * sizeof(VkCommandBuffer),
                                            pSubmits[i].pCommandBuffers);
@@ -2320,7 +2320,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkQueueBindSparse(VkQueu
         vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBindInfo[i].pBufferBinds),
                                            pPacket->pBindInfo[i].bufferBindCount * sizeof(VkSparseBufferMemoryBindInfo),
                                            pBindInfo[i].pBufferBinds);
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pBindInfo[i].pNext), pBindInfo[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pBindInfo + i), pBindInfo + i);
         for (uint32_t j = 0; j < pPacket->pBindInfo[i].bufferBindCount; j++) {
             VkSparseBufferMemoryBindInfo* pSparseBufferMemoryBindInfo =
                 (VkSparseBufferMemoryBindInfo*)&pPacket->pBindInfo[i].pBufferBinds[j];
@@ -2423,17 +2423,17 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdWaitEvents(
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pMemoryBarriers), memoryBarrierCount * sizeof(VkMemoryBarrier),
                                        pMemoryBarriers);
     for (uint32_t i = 0; i < memoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pMemoryBarriers[i].pNext), pMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pMemoryBarriers + i), pMemoryBarriers + i);
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBufferMemoryBarriers),
                                        bufferMemoryBarrierCount * sizeof(VkBufferMemoryBarrier), pBufferMemoryBarriers);
     for (uint32_t i = 0; i < bufferMemoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pBufferMemoryBarriers[i].pNext), pBufferMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pBufferMemoryBarriers + i), pBufferMemoryBarriers + i);
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pImageMemoryBarriers),
                                        imageMemoryBarrierCount * sizeof(VkImageMemoryBarrier), pImageMemoryBarriers);
     for (uint32_t i = 0; i < imageMemoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pImageMemoryBarriers[i].pNext), pImageMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pImageMemoryBarriers + i), pImageMemoryBarriers + i);
 
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pMemoryBarriers));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pBufferMemoryBarriers));
@@ -2495,17 +2495,17 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdPipelineBarrier(
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pMemoryBarriers), memoryBarrierCount * sizeof(VkMemoryBarrier),
                                        pMemoryBarriers);
     for (uint32_t i = 0; i < memoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pMemoryBarriers[i].pNext), pMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pMemoryBarriers + i), pMemoryBarriers + i);
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBufferMemoryBarriers),
                                        bufferMemoryBarrierCount * sizeof(VkBufferMemoryBarrier), pBufferMemoryBarriers);
     for (uint32_t i = 0; i < bufferMemoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pBufferMemoryBarriers[i].pNext), pBufferMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pBufferMemoryBarriers + i), pBufferMemoryBarriers + i);
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pImageMemoryBarriers),
                                        imageMemoryBarrierCount * sizeof(VkImageMemoryBarrier), pImageMemoryBarriers);
     for (uint32_t i = 0; i < imageMemoryBarrierCount; i++)
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pImageMemoryBarriers[i].pNext), pImageMemoryBarriers[i].pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pImageMemoryBarriers + i), pImageMemoryBarriers + i);
 
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pMemoryBarriers));
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pBufferMemoryBarriers));
@@ -2791,7 +2791,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreatePipelineCache(Vk
     pPacket = interpret_body_as_vkCreatePipelineCache(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkPipelineCacheCreateInfo), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pInitialData),
                                        ROUNDUP_TO_4(pPacket->pCreateInfo->initialDataSize), pCreateInfo->pInitialData);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
@@ -2835,7 +2835,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdBeginRenderPass(VkComma
     pPacket->contents = contents;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pRenderPassBegin), sizeof(VkRenderPassBeginInfo),
                                        pRenderPassBegin);
-    if (pRenderPassBegin) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pRenderPassBegin->pNext), pRenderPassBegin->pNext);
+    if (pRenderPassBegin) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)(pPacket->pRenderPassBegin), pRenderPassBegin);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pRenderPassBegin->pClearValues), clearValueSize,
                                        pRenderPassBegin->pClearValues);
     vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pRenderPassBegin->pClearValues));
@@ -2931,7 +2931,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateImage(VkDevice d
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkImageCreateInfo), pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pQueueFamilyIndices),
                                        sizeof(uint32_t) * pCreateInfo->queueFamilyIndexCount, pCreateInfo->pQueueFamilyIndices);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pImage), sizeof(VkImage), pImage);
     pPacket->result = result;
@@ -3008,7 +3008,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateBuffer(VkDevice 
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkBufferCreateInfo), pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pQueueFamilyIndices), sizeof(uint32_t) * pCreateInfo->queueFamilyIndexCount, pCreateInfo->pQueueFamilyIndices);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pBuffer), sizeof(VkBuffer), pBuffer);
     pPacket->result = result;
@@ -3163,7 +3163,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateSwapchainKHR(VkD
     pPacket = interpret_body_as_vkCreateSwapchainKHR(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkSwapchainCreateInfoKHR), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pSwapchain), sizeof(VkSwapchainKHR), pSwapchain);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pQueueFamilyIndices),
@@ -3269,7 +3269,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkQueuePresentKHR(VkQueu
     pPacket = interpret_body_as_vkQueuePresentKHR(pHeader);
     pPacket->queue = queue;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo), sizeof(VkPresentInfoKHR), pPresentInfo);
-    if (pPresentInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pPresentInfo->pNext), pPresentInfo->pNext);
+    if (pPresentInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pPresentInfo, pPresentInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo->pSwapchains), swapchainSize,
                                        pPresentInfo->pSwapchains);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pPresentInfo->pImageIndices), indexSize,
@@ -3377,7 +3377,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateWin32SurfaceKHR(
     pPacket = interpret_body_as_vkCreateWin32SurfaceKHR(pHeader);
     pPacket->instance = instance;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkWin32SurfaceCreateInfoKHR), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pSurface), sizeof(VkSurfaceKHR), pSurface);
     pPacket->result = result;
@@ -3790,7 +3790,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateDescriptorUpdate
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkDescriptorUpdateTemplateCreateInfoKHR),
                                        pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo->pDescriptorUpdateEntries),
                                        sizeof(VkDescriptorUpdateTemplateEntryKHR) * pCreateInfo->descriptorUpdateEntryCount,
                                        pCreateInfo->pDescriptorUpdateEntries);
@@ -3984,7 +3984,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateObjectTableNVX(
     pPacket = interpret_body_as_vkCreateObjectTableNVX(pHeader);
     pPacket->device = device;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkObjectTableCreateInfoNVX), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pObjectTable), sizeof(VkObjectTableNVX), pObjectTable);
     if (pCreateInfo) {
@@ -4038,7 +4038,7 @@ VKTRACER_EXPORT VKAPI_ATTR void VKAPI_CALL __HOOKED_vkCmdProcessCommandsNVX(
     pPacket->commandBuffer = commandBuffer;
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pProcessCommandsInfo), sizeof(VkCmdProcessCommandsInfoNVX), pProcessCommandsInfo);
     if (pProcessCommandsInfo) {
-        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pProcessCommandsInfo->pNext), pProcessCommandsInfo->pNext);
+        vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pProcessCommandsInfo, pProcessCommandsInfo);
         vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pProcessCommandsInfo->pIndirectCommandsTokens),
                                            pProcessCommandsInfo->indirectCommandsTokenCount * sizeof(VkIndirectCommandsTokenNVX), pProcessCommandsInfo->pIndirectCommandsTokens);
         vktrace_finalize_buffer_address(pHeader, (void**)&(pPacket->pProcessCommandsInfo->pIndirectCommandsTokens));
@@ -4081,7 +4081,7 @@ VKTRACER_EXPORT VKAPI_ATTR VkResult VKAPI_CALL __HOOKED_vkCreateIndirectCommands
     pPacket->device = device;
 
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pCreateInfo), sizeof(VkIndirectCommandsLayoutCreateInfoNVX), pCreateInfo);
-    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void **)&(pPacket->pCreateInfo->pNext), pCreateInfo->pNext);
+    if (pCreateInfo) vktrace_add_pnext_structs_to_trace_packet(pHeader, (void *)pPacket->pCreateInfo, pCreateInfo);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pAllocator), sizeof(VkAllocationCallbacks), NULL);
     vktrace_add_buffer_to_trace_packet(pHeader, (void**)&(pPacket->pIndirectCommandsLayout), sizeof(VkIndirectCommandsLayoutNVX), pIndirectCommandsLayout);
     if (pCreateInfo)
