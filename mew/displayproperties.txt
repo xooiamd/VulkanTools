@@ -1,0 +1,428 @@
+VK_KHR_get_display_properties2
+
+New Structures
+• VkDisplayProperties2KHR
+• VkDisplayPlaneProperties2KHR
+• VkDisplayModeProperties2KHR
+• VkDisplayPlaneInfo2KHR
+• VkDisplayPlaneCapabilities2KHR
+
+
+
+VK_KHR_get_display_properties2
+Name String
+VK_KHR_get_display_properties2
+Extension Type
+Instance extension
+Registered Extension Number
+122
+Revision
+1
+Extension and Version Dependencies
+• Requires Vulkan 1.0
+• Requires VK_KHR_display
+Contact
+• James Jones @cubanismo
+Last Modified Date
+2017-02-21
+1298 | Appendix D: Layers & Extensions (Informative)
+IP Status
+No known IP claims.
+Contributors
+• Ian Elliott, Google
+• James Jones, NVIDIA
+This extension provides new entry points to query device display properties and capabilities in a
+way that can be easily extended by other extensions, without introducing any further entry points.
+This extension can be considered the VK_KHR_display equivalent of the
+VK_KHR_get_physical_device_properties2 extension.
+New Object Types
+None.
+New Enum Constants
+• Extending VkStructureType:
+?
+VK_STRUCTURE_TYPE_DISPLAY_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_DISPLAY_PLANE_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_DISPLAY_MODE_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_DISPLAY_PLANE_INFO_2_KHR
+?
+VK_STRUCTURE_TYPE_DISPLAY_PLANE_CAPABILITIES_2_KHR
+New Enums
+None.
+New Structures
+• VkDisplayProperties2KHR
+• VkDisplayPlaneProperties2KHR
+• VkDisplayModeProperties2KHR
+• VkDisplayPlaneInfo2KHR
+• VkDisplayPlaneCapabilities2KHR
+New Functions
+• vkGetPhysicalDeviceDisplayProperties2KHR
+• vkGetPhysicalDeviceDisplayPlaneProperties2KHR
+• vkGetDisplayModeProperties2KHR
+• vkGetDisplayPlaneCapabilities2KHR
+Appendix D: Layers & Extensions (Informative) | 1299
+Issues
+1) What should this extension be named?
+RESOLVED: VK_KHR_get_display_properties2. Other alternatives:
+• VK_KHR_display2
+• One extension, combined with VK_KHR_surface_capabilites2.
+2) Should extensible input structs be added for these new functions:
+RESOLVED:
+• vkGetPhysicalDeviceDisplayProperties2KHR: No. The only current input is a VkPhysicalDevice.
+Other inputs wouldn’t make sense.
+• vkGetPhysicalDeviceDisplayPlaneProperties2KHR: No. The only current input is a
+VkPhysicalDevice. Other inputs wouldn’t make sense.
+• vkGetDisplayModeProperties2KHR: No. The only curent inputs are a VkPhysicalDevice and a
+VkDisplayModeKHR. Other inputs wouldn’t make sense.
+3) Should additional display query functions be extended?
+RESOLVED:
+• vkGetDisplayPlaneSupportedDisplaysKHR: No. Extensions should instead extend
+vkGetDisplayPlaneCapabilitiesKHR().
+Version History
+• Revision 1, 2017-02-21 (James Jones)
+? Initial draft.
+VK_KHR_get_memory_requirements2
+Name String
+VK_KHR_get_memory_requirements2
+Extension Type
+Device extension
+Registered Extension Number
+147
+Revision
+1
+Extension and Version Dependencies
+• Requires Vulkan 1.0
+1300 | Appendix D: Layers & Extensions (Informative)
+Contact
+• Jason Ekstrand @jekstrand
+Last Modified Date
+2017-09-05
+IP Status
+No known IP claims.
+Interactions and External Dependencies
+• Promoted to Vulkan 1.1 Core
+Contributors
+• Jason Ekstrand, Intel
+• Jeff Bolz, NVIDIA
+• Jesse Hall, Google
+This extension provides new entry points to query memory requirements of images and buffers in
+a way that can be easily extended by other extensions, without introducing any further entry
+points. The Vulkan 1.0 VkMemoryRequirements and VkSparseImageMemoryRequirements
+structures do not include a sType/pNext, this extension wraps them in new structures with sType
+/pNext so an application can query a chain of memory requirements structures by constructing the
+chain and letting the implementation fill them in. A new command is added for each
+vkGet*MemoryRequrements command in core Vulkan 1.0.
+New Object Types
+None.
+New Enum Constants
+• Extending VkStructureType:
+?
+VK_STRUCTURE_TYPE_BUFFER_MEMORY_REQUIREMENTS_INFO_2_KHR
+?
+VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2_KHR
+?
+VK_STRUCTURE_TYPE_IMAGE_SPARSE_MEMORY_REQUIREMENTS_INFO_2_KHR
+?
+VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2_KHR
+?
+VK_STRUCTURE_TYPE_SPARSE_IMAGE_MEMORY_REQUIREMENTS_2_KHR
+New Enums
+None.
+New Structures
+• VkBufferMemoryRequirementsInfo2KHR
+• VkImageMemoryRequirementsInfo2KHR
+Appendix D: Layers & Extensions (Informative) | 1301
+• VkImageSparseMemoryRequirementsInfo2KHR
+• VkMemoryRequirements2KHR
+• VkSparseImageMemoryRequirements2KHR
+New Functions
+• vkGetImageMemoryRequirements2KHR
+• vkGetBufferMemoryRequirements2KHR
+• vkGetImageSparseMemoryRequirements2KHR
+Promotion to Vulkan 1.1
+All functionality in this extension is included in core Vulkan 1.1, with the KHR suffix omitted. The
+original type, enum and command names are still available as aliases of the core functionality.
+Issues
+None.
+Version History
+• Revision 1, 2017-03-23 (Jason Ekstrand)
+? Internal revisions
+VK_KHR_get_physical_device_properties2
+Name String
+VK_KHR_get_physical_device_properties2
+Extension Type
+Instance extension
+Registered Extension Number
+60
+Revision
+1
+Extension and Version Dependencies
+• Requires Vulkan 1.0
+Contact
+• Jeff Bolz @jeffbolznv
+Last Modified Date
+2017-09-05
+1302 | Appendix D: Layers & Extensions (Informative)
+IP Status
+No known IP claims.
+Interactions and External Dependencies
+• Promoted to Vulkan 1.1 Core
+Contributors
+• Jeff Bolz, NVIDIA
+• Ian Elliott, Google
+This extension provides new entry points to query device features, device properties, and format
+properties in a way that can be easily extended by other extensions, without introducing any
+further entry points. The Vulkan 1.0 feature/limit/formatproperty structures do not include sType
+/pNext members. This extension wraps them in new structures with sType/pNext members, so an
+application can query a chain of feature/limit/formatproperty structures by constructing the chain
+and letting the implementation fill them in. A new command is added for each
+vkGetPhysicalDevice* command in core Vulkan 1.0. The new feature structure (and a chain of
+extension structures) can also be passed in to device creation to enable features.
+This extension also allows applications to use the physical-device components of device extensions
+before vkCreateDevice is called.
+New Object Types
+None.
+New Enum Constants
+• Extending VkStructureType:
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2_KHR
+?
+VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_SPARSE_IMAGE_FORMAT_PROPERTIES_2_KHR
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SPARSE_IMAGE_FORMAT_INFO_2_KHR
+New Enums
+None.
+New Structures
+• VkPhysicalDeviceFeatures2KHR
+Appendix D: Layers & Extensions (Informative) | 1303
+• VkPhysicalDeviceProperties2KHR
+• VkFormatProperties2KHR
+• VkImageFormatProperties2KHR
+• VkPhysicalDeviceImageFormatInfo2KHR
+• VkQueueFamilyProperties2KHR
+• VkPhysicalDeviceMemoryProperties2KHR
+• VkSparseImageFormatProperties2KHR
+• VkPhysicalDeviceSparseImageFormatInfo2KHR
+New Functions
+• vkGetPhysicalDeviceFeatures2KHR
+• vkGetPhysicalDeviceProperties2KHR
+• vkGetPhysicalDeviceFormatProperties2KHR
+• vkGetPhysicalDeviceImageFormatProperties2KHR
+• vkGetPhysicalDeviceQueueFamilyProperties2KHR
+• vkGetPhysicalDeviceMemoryProperties2KHR
+• vkGetPhysicalDeviceSparseImageFormatProperties2KHR
+Promotion to Vulkan 1.1
+All functionality in this extension is included in core Vulkan 1.1, with the KHR suffix omitted. The
+original type, enum and command names are still available as aliases of the core functionality.
+Issues
+None.
+Examples
+ // Get features with a hypothetical future extension.
+ VkHypotheticalExtensionFeaturesKHR hypotheticalFeatures =
+ {
+ VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR, //
+sType
+ NULL, //
+pNext
+ };
+ VkPhysicalDeviceFeatures2KHR features =
+ {
+ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR, //
+sType
+1304 | Appendix D: Layers & Extensions (Informative)
+ &hypotheticalFeatures, //
+pNext
+ };
+ // After this call, features and hypotheticalFeatures have been filled out.
+ vkGetPhysicalDeviceFeatures2KHR(physicalDevice, &features);
+ // Properties/limits can be chained and queried similarly.
+ // Enable some features:
+ VkHypotheticalExtensionFeaturesKHR enabledHypotheticalFeatures =
+ {
+ VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR, //
+sType
+ NULL, //
+pNext
+ };
+ VkPhysicalDeviceFeatures2KHR enabledFeatures =
+ {
+ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR, //
+sType
+ &enabledHypotheticalFeatures, //
+pNext
+ };
+ enabledFeatures.features.xyz = VK_TRUE;
+ enabledHypotheticalFeatures.abc = VK_TRUE;
+ VkDeviceCreateInfo deviceCreateInfo =
+ {
+ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, //
+sType
+ &enabledFeatures, //
+pNext
+ ...
+ NULL, //
+pEnabledFeatures
+ }
+ VkDevice device;
+ vkCreateDevice(physicalDevice, &deviceCreateInfo, NULL, &device);
+Version History
+• Revision 1, 2016-09-12 (Jeff Bolz)
+? Internal revisions
+• Revision 2, 2016-11-02 (Ian Elliott)
+? Added ability for applications to use the physical-device components of device extensions
+Appendix D: Layers & Extensions (Informative) | 1305
+before vkCreateDevice is called.
+VK_KHR_get_surface_capabilities2
+Name String
+VK_KHR_get_surface_capabilities2
+Extension Type
+Instance extension
+Registered Extension Number
+120
+Revision
+1
+Extension and Version Dependencies
+• Requires Vulkan 1.0
+• Requires VK_KHR_surface
+Contact
+• James Jones @cubanismo
+Last Modified Date
+2017-02-27
+IP Status
+No known IP claims.
+Contributors
+• Ian Elliott, Google
+• James Jones, NVIDIA
+• Alon Or-bach, Samsung
+This extension provides new entry points to query device surface capabilities in a way that can be
+easily extended by other extensions, without introducing any further entry points. This extension
+can be considered the VK_KHR_surface equivalent of the VK_KHR_get_physical_device_properties2
+extension.
+New Object Types
+None.
+New Enum Constants
+• Extending VkStructureType:
+?
+VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR
+1306 | Appendix D: Layers & Extensions (Informative)
+?
+VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_KHR
+?
+VK_STRUCTURE_TYPE_SURFACE_FORMAT_2_KHR
+New Enums
+None.
+New Structures
+• VkPhysicalDeviceSurfaceInfo2KHR
+• VkSurfaceCapabilities2KHR
+• VkSurfaceFormat2KHR
+New Functions
+• vkGetPhysicalDeviceSurfaceCapabilities2KHR
+• vkGetPhysicalDeviceSurfaceFormats2KHR
+Issues
+1) What should this extension be named?
+RESOLVED: VK_KHR_get_surface_capabilities2. Other alternatives:
+•
+VK_KHR_surface2
+• One extension, combining a separate display-specific query extension.
+2) Should additional WSI query functions be extended?
+RESOLVED:
+• vkGetPhysicalDeviceSurfaceCapabilitiesKHR: Yes. The need for this motivated the extension.
+• vkGetPhysicalDeviceSurfaceSupportKHR: No. Currently only has boolean output. Extensions
+should instead extend vkGetPhysicalDeviceSurfaceCapabilities2KHR.
+• vkGetPhysicalDeviceSurfaceFormatsKHR: Yes.
+• vkGetPhysicalDeviceSurfacePresentModesKHR: No. Recent discussion concluded this
+introduced too much variability for applications to deal with. Extensions should instead extend
+vkGetPhysicalDeviceSurfaceCapabilities2KHR.
+• vkGetPhysicalDeviceXlibPresentationSupportKHR: Not in this extension.
+• vkGetPhysicalDeviceXcbPresentationSupportKHR: Not in this extension.
+• vkGetPhysicalDeviceWaylandPresentationSupportKHR: Not in this extension.
+• vkGetPhysicalDeviceMirPresentationSupportKHR: Not in this extension.
+• vkGetPhysicalDeviceWin32PresentationSupportKHR: Not in this extension.
+Appendix D: Layers & Extensions (Informative) | 1307
+Version History
+• Revision 1, 2017-02-27 (James Jones)
+? Initial draft.
+VK_KHR_image_format_list
+Name String
+VK_KHR_image_format_list
+Extension Type
+Device extension
+Registered Extension Number
+148
+Revision
+1
+Extension and Version Dependencies
+• Requires Vulkan 1.0
+Contact
+• Jason Ekstrand @jekstrand
+Last Modified Date
+2017-03-20
+IP Status
+No known IP claims.
+Contributors
+• Jason Ekstrand, Intel
+• Jan-Harald Fredriksen, ARM
+• Jeff Bolz, NVIDIA
+• Jeff Leger, Qualcomm
+• Neil Henning, Codeplay
+On some implementations, setting the VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT on image creation can
+cause access to that image to perform worse than an equivalent image created without
+VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT because the implementation does not know what view formats
+will be paired with the image.
+This extension allows an application to provide the list of all formats that can be used with an
+image when it is created. The implementation may then be able to create a more efficient image
+that supports the subset of formats required by the application without having to support all
+1308 | Appendix D: Layers & Extensions (Informative)
+formats in the format compatibility class of the image format.
+New Object Types
+None.
+New Enum Constants
+•
+VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR
+New Enums
+None.
+New Structs
+• VkImageFormatListCreateInfoKHR
+New Functions
+None.
+Issues
+
+=============================================================================
+30.3. Presenting Directly to Display Devices
+VK_KHR_display
+
+VkResult vkGetPhysicalDeviceDisplayPropertiesKHR(
+ VkPhysicalDevice physicalDevice,
+ uint32_t* pPropertyCount,
+ VkDisplayPropertiesKHR* pProperties);
+• physicalDevice is a physical device.
+• pPropertyCount is a pointer to an integer related to the number of displa
+
+ypedef struct VkDisplayPropertiesKHR {
+ VkDisplayKHR display;
+ const char* displayName;
+ VkExtent2D physicalDimensions;
+ VkExtent2D physicalResolution;
+ VkSurfaceTransformFlagsKHR supportedTransforms;
+ VkBool32 planeReorderPossible;
+ VkBool32 persistentContent;
+} VkDisplayPropertiesKHR;
+• display is a handle that is used to refer t
+
+
+
+
