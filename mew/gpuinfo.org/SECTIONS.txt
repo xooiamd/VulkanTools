@@ -1,0 +1,13 @@
+# mew 2018-05-21
+# Find gpuinfo.org sections not defined in the devsim_1_0_0 schema.
+# The following list generated using:
+#       sort -u gpuinfo_*.json > sections.txt
+# then some manual editing.
+
+    "environment"
+    "extended"
+    "instance"
+    "platformdetails"
+    "platformdetails"
+    "surfacecapabilites"
+
