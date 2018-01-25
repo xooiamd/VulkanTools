@@ -40,6 +40,7 @@ FILENAME_01_RESULT="device_simulation_layer_test_1.json"
 FILENAME_01_STDOUT="device_simulation_layer_test_1.txt"
 
 export VK_DEVSIM_FILENAME="${FILENAME_01_IN}"
+LD_DEBUG=libs,files VK_LOADER_DEBUG=all ${VKJSON_INFO}
 ${VKJSON_INFO} > ${FILENAME_01_STDOUT}
 
 # reformat/extract/sort vkjson output using jq, then compare against gold.
