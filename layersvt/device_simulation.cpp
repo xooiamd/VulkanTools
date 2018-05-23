@@ -65,8 +65,8 @@ namespace {
 // layersvt/{linux,windows}/VkLayer_device_simulation*.json
 
 const uint32_t kVersionDevsimMajor = 1;
-const uint32_t kVersionDevsimMinor = 2;
-const uint32_t kVersionDevsimPatch = 6;
+const uint32_t kVersionDevsimMinor = 4;
+const uint32_t kVersionDevsimPatch = 0;
 const uint32_t kVersionDevsimImplementation = VK_MAKE_VERSION(kVersionDevsimMajor, kVersionDevsimMinor, kVersionDevsimPatch);
 
 // Properties of this layer:
