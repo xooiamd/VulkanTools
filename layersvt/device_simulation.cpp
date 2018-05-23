@@ -529,6 +529,7 @@ class JsonLoader {
     enum class SchemaId {
         kUnknown = 0,
         kDevsim100,
+        kDevsim110,
     };
 
     SchemaId IdentifySchema(const Json::Value &value);
@@ -832,6 +833,17 @@ bool JsonLoader::LoadFile(const char *filename) {
             result = true;
             break;
 
+        case SchemaId::kDevsim110:
+            GetValue(root, "VkPhysicalDeviceProperties", &pdd_.physical_device_properties_);
+            GetValue(root, "VkPhysicalDeviceFeatures", &pdd_.physical_device_features_);
+            GetValue(root, "VkPhysicalDeviceMemoryProperties", &pdd_.physical_device_memory_properties_);
+            GetArray(root, "ArrayOfVkQueueFamilyProperties", &pdd_.arrayof_queue_family_properties_);
+            GetArray(root, "ArrayOfVkFormatProperties", &pdd_.arrayof_format_properties_);
+            WarnDeprecated(root, "ArrayOfVkLayerProperties");
+            WarnDeprecated(root, "ArrayOfVkExtensionProperties");
+            result = true;
+            break;
+
         case SchemaId::kUnknown:
         default:
             break;
@@ -852,6 +864,10 @@ JsonLoader::SchemaId JsonLoader::IdentifySchema(const Json::Value &value) {
     if (strcmp(schema_string, "https://schema.khronos.org/vulkan/devsim_1_0_0.json#") == 0) {
         schema_id = SchemaId::kDevsim100;
     }
+    if (strcmp(schema_string, "https://schema.khronos.org/vulkan/devsim_1_1_0.json#") == 0) {
+        schema_id = SchemaId::kDevsim110;
+    }
+
 
     if (schema_id != SchemaId::kUnknown) {
         DebugPrintf("\tDocument schema \"%s\" is schema_id %d\n", schema_string, schema_id);
