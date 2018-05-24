@@ -493,6 +493,7 @@ class PhysicalDeviceData {
     VkPhysicalDeviceMemoryProperties physical_device_memory_properties_;
     ArrayOfVkQueueFamilyProperties arrayof_queue_family_properties_;
     ArrayOfVkFormatProperties arrayof_format_properties_;
+    ArrayOfVkLayerProperties arrayof_instance_layer_properties_;
 
    private:
     PhysicalDeviceData() = delete;
@@ -846,6 +847,7 @@ bool JsonLoader::LoadFile(const char *filename) {
             GetValue(root, "VkPhysicalDeviceMemoryProperties", &pdd_.physical_device_memory_properties_);
             GetArray(root, "ArrayOfVkQueueFamilyProperties", &pdd_.arrayof_queue_family_properties_);
             GetArray(root, "ArrayOfVkFormatProperties", &pdd_.arrayof_format_properties_);
+            GetArray(root, "ArrayOfInstanceVkLayerProperties", &pdd_.arrayof_instance_layer_properties_);
             ErrorDeprecated(root, "ArrayOfVkLayerProperties");
             ErrorDeprecated(root, "ArrayOfVkExtensionProperties");
             result = true;
