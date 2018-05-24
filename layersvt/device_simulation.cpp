@@ -552,6 +552,13 @@ class JsonLoader {
         }
     }
 
+    void ErrorDeprecated(const Json::Value &parent, const char *name) {
+        const Json::Value value = parent[name];
+        if (value.type() != Json::nullValue) {
+            ErrorPrintf("JSON section %s is deprecated and no longer permitted.\n", name);
+        }
+    }
+
     // For use as warn_func in GET_VALUE_WARN().  Return true if warning occurred.
     static bool WarnIfGreater(const char *name, const uint64_t new_value, const uint64_t old_value) {
         if (new_value > old_value) {
@@ -839,8 +846,8 @@ bool JsonLoader::LoadFile(const char *filename) {
             GetValue(root, "VkPhysicalDeviceMemoryProperties", &pdd_.physical_device_memory_properties_);
             GetArray(root, "ArrayOfVkQueueFamilyProperties", &pdd_.arrayof_queue_family_properties_);
             GetArray(root, "ArrayOfVkFormatProperties", &pdd_.arrayof_format_properties_);
-            WarnDeprecated(root, "ArrayOfVkLayerProperties");
-            WarnDeprecated(root, "ArrayOfVkExtensionProperties");
+            ErrorDeprecated(root, "ArrayOfVkLayerProperties");
+            ErrorDeprecated(root, "ArrayOfVkExtensionProperties");
             result = true;
             break;
 
