@@ -444,6 +444,7 @@ uint32_t loader_layer_iface_version = CURRENT_LOADER_LAYER_INTERFACE_VERSION;
 typedef std::vector<VkQueueFamilyProperties> ArrayOfVkQueueFamilyProperties;
 typedef std::unordered_map<uint32_t /*VkFormat*/, VkFormatProperties> ArrayOfVkFormatProperties;
 typedef std::vector<VkLayerProperties> ArrayOfVkLayerProperties;
+typedef std::vector<VkExtensionProperties> ArrayOfVkExtensionProperties;
 
 // FormatProperties utilities ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -494,6 +495,8 @@ class PhysicalDeviceData {
     ArrayOfVkQueueFamilyProperties arrayof_queue_family_properties_;
     ArrayOfVkFormatProperties arrayof_format_properties_;
     ArrayOfVkLayerProperties arrayof_instance_layer_properties_;
+    ArrayOfVkExtensionProperties arrayof_instance_system_extension_properties_;
+    ArrayOfVkExtensionProperties arrayof_device_system_extension_properties_;
 
    private:
     PhysicalDeviceData() = delete;
@@ -545,6 +548,7 @@ class JsonLoader {
     void GetValue(const Json::Value &parent, int index, VkQueueFamilyProperties *dest);
     void GetValue(const Json::Value &parent, int index, DevsimFormatProperties *dest);
     void GetValue(const Json::Value &parent, int index, VkLayerProperties *dest);
+    void GetValue(const Json::Value &parent, int index, VkExtensionProperties *dest);
 
     void WarnDeprecated(const Json::Value &parent, const char *name) {
         const Json::Value value = parent[name];
@@ -768,6 +772,22 @@ class JsonLoader {
         return static_cast<int>(dest->size());
     }
 
+    int GetArray(const Json::Value &parent, const char *name, ArrayOfVkExtensionProperties *dest) {
+        const Json::Value value = parent[name];
+        if (value.type() != Json::arrayValue) {
+            return -1;
+        }
+        DebugPrintf("\t\tJsonLoader::GetValue(ArrayOfVkExtensionProperties)\n");
+        dest->clear();
+        const int count = static_cast<int>(value.size());
+        for (int i = 0; i < count; ++i) {
+            VkExtensionProperties extension_properties = {};
+            GetValue(value, i, &extension_properties);
+            dest->push_back(extension_properties);
+        }
+        return static_cast<int>(dest->size());
+    }
+
     PhysicalDeviceData &pdd_;
 
 }; // class JsonLoader
@@ -848,6 +868,8 @@ bool JsonLoader::LoadFile(const char *filename) {
             GetArray(root, "ArrayOfVkQueueFamilyProperties", &pdd_.arrayof_queue_family_properties_);
             GetArray(root, "ArrayOfVkFormatProperties", &pdd_.arrayof_format_properties_);
             GetArray(root, "ArrayOfInstanceVkLayerProperties", &pdd_.arrayof_instance_layer_properties_);
+            GetArray(root, "ArrayOfInstanceSystemVkExtensionProperties", &pdd_.arrayof_instance_system_extension_properties_);
+            GetArray(root, "ArrayOfDeviceSystemVkExtensionProperties", &pdd_.arrayof_device_system_extension_properties_);
             ErrorDeprecated(root, "ArrayOfVkLayerProperties");
             ErrorDeprecated(root, "ArrayOfVkExtensionProperties");
             result = true;
@@ -1177,6 +1199,16 @@ void JsonLoader::GetValue(const Json::Value &parent, int index, VkLayerPropertie
     GET_VALUE(specVersion);
     GET_VALUE(implementationVersion);
     GET_ARRAY(description);  // size < VK_MAX_DESCRIPTION_SIZE
+}
+
+void JsonLoader::GetValue(const Json::Value &parent, int index, VkExtensionProperties *dest) {
+    const Json::Value value = parent[index];
+    if (value.type() != Json::objectValue) {
+        return;
+    }
+    DebugPrintf("\t\tJsonLoader::GetValue(VkExtensionProperties)\n");
+    GET_ARRAY(extensionName);  // size < VK_MAX_EXTENSION_NAME_SIZE
+    GET_VALUE(specVersion);
 }
 
 #undef GET_VALUE
