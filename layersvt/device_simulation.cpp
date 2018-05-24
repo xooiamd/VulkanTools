@@ -445,6 +445,7 @@ typedef std::vector<VkQueueFamilyProperties> ArrayOfVkQueueFamilyProperties;
 typedef std::unordered_map<uint32_t /*VkFormat*/, VkFormatProperties> ArrayOfVkFormatProperties;
 typedef std::vector<VkLayerProperties> ArrayOfVkLayerProperties;
 typedef std::vector<VkExtensionProperties> ArrayOfVkExtensionProperties;
+typedef std::unordered_map<std::string, ArrayOfVkExtensionProperties> ArrayOfLayerVkExtensionProperties;
 
 // FormatProperties utilities ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -497,6 +498,8 @@ class PhysicalDeviceData {
     ArrayOfVkLayerProperties arrayof_instance_layer_properties_;
     ArrayOfVkExtensionProperties arrayof_instance_system_extension_properties_;
     ArrayOfVkExtensionProperties arrayof_device_system_extension_properties_;
+    ArrayOfLayerVkExtensionProperties arrayof_instance_layer_extension_properties_;
+    ArrayOfLayerVkExtensionProperties arrayof_device_layer_extension_properties_;
 
    private:
     PhysicalDeviceData() = delete;
@@ -788,6 +791,19 @@ class JsonLoader {
         return static_cast<int>(dest->size());
     }
 
+    void GetValue( Json::Value &parent, const char *name, ArrayOfLayerVkExtensionProperties *dest) {
+        const Json::Value value = parent[name];
+        if (value.type() != Json::objectValue) {
+            return;
+        }
+        DebugPrintf("\t\tJsonLoader::GetValue(ArrayOfLayerVkExtensionProperties)\n");
+        char layerName[VK_MAX_EXTENSION_NAME_SIZE] = {};
+        GetArray(value, "layerName", layerName);
+        ArrayOfVkExtensionProperties arrayof_extensions;
+        GetArray(value, "extensions", &arrayof_extensions);
+        dest->insert({layerName, arrayof_extensions});
+    }
+
     PhysicalDeviceData &pdd_;
 
 }; // class JsonLoader
@@ -870,6 +886,8 @@ bool JsonLoader::LoadFile(const char *filename) {
             GetArray(root, "ArrayOfInstanceVkLayerProperties", &pdd_.arrayof_instance_layer_properties_);
             GetArray(root, "ArrayOfInstanceSystemVkExtensionProperties", &pdd_.arrayof_instance_system_extension_properties_);
             GetArray(root, "ArrayOfDeviceSystemVkExtensionProperties", &pdd_.arrayof_device_system_extension_properties_);
+            GetValue(root, "ArrayOfInstanceLayerVkExtensionProperties", &pdd_.arrayof_instance_layer_extension_properties_);
+            GetValue(root, "ArrayOfDeviceLayerVkExtensionProperties", &pdd_.arrayof_device_layer_extension_properties_);
             ErrorDeprecated(root, "ArrayOfVkLayerProperties");
             ErrorDeprecated(root, "ArrayOfVkExtensionProperties");
             result = true;
