@@ -761,7 +761,8 @@ class JsonLoader {
     }
 
     PhysicalDeviceData &pdd_;
-};
+
+}; // class JsonLoader
 
 bool JsonLoader::LoadFiles() {
     std::string value = GetEnvarValue(kEnvarDevsimFilename);
