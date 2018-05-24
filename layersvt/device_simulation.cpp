@@ -1382,7 +1382,7 @@ VKAPI_ATTR void VKAPI_CALL GetPhysicalDeviceProperties(VkPhysicalDevice physical
 }
 
 VKAPI_ATTR void VKAPI_CALL GetPhysicalDeviceProperties2(VkPhysicalDevice physicalDevice,
-                                                        VkPhysicalDeviceProperties2KHR *pProperties) {
+                                                        VkPhysicalDeviceProperties2 *pProperties) {
     {
         std::lock_guard<std::mutex> lock(global_lock);
         const auto dt = instance_dispatch_table(physicalDevice);
@@ -1408,7 +1408,7 @@ VKAPI_ATTR void VKAPI_CALL GetPhysicalDeviceFeatures(VkPhysicalDevice physicalDe
     }
 }
 
-VKAPI_ATTR void VKAPI_CALL GetPhysicalDeviceFeatures2(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures2KHR *pFeatures) {
+VKAPI_ATTR void VKAPI_CALL GetPhysicalDeviceFeatures2(VkPhysicalDevice physicalDevice, VkPhysicalDeviceFeatures2 *pFeatures) {
     {
         std::lock_guard<std::mutex> lock(global_lock);
         const auto dt = instance_dispatch_table(physicalDevice);
