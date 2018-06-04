@@ -500,6 +500,22 @@ class PhysicalDeviceData {
     ArrayOfVkExtensionProperties arrayof_device_system_extension_properties_;
     ArrayOfLayerVkExtensionProperties arrayof_instance_layer_extension_properties_;
     ArrayOfLayerVkExtensionProperties arrayof_device_layer_extension_properties_;
+#if 0 // TODO mewmew
+         "VkPhysicalDeviceProperties": {"$ref": "#/definitions/VkPhysicalDeviceProperties"},
++        "VkPhysicalDeviceIDProperties": {"$ref": "#/definitions/VkPhysicalDeviceIDProperties"},
++        "VkPhysicalDeviceMaintenance3Properties": {"$ref": "#/definitions/VkPhysicalDeviceMaintenance3Properties"},
++        "VkPhysicalDeviceMultiviewProperties": {"$ref": "#/definitions/VkPhysicalDeviceMultiviewProperties"},
++        "VkPhysicalDevicePointClippingProperties": {"$ref": "#/definitions/VkPhysicalDevicePointClippingProperties"},
++        "VkPhysicalDeviceProtectedMemoryProperties": {"$ref": "#/definitions/VkPhysicalDeviceProtectedMemoryProperties"},
++        "VkPhysicalDeviceSubgroupProperties": {"$ref": "#/definitions/VkPhysicalDeviceSubgroupProperties"},
+
+         "VkPhysicalDeviceFeatures": {"$ref": "#/definitions/VkPhysicalDeviceFeatures"},
++        "VkPhysicalDeviceVariablePointerFeatures": {"$ref": "#/definitions/VkPhysicalDeviceVariablePointerFeatures"},
++        "VkPhysicalDeviceMultiviewFeatures": {"$ref": "#/definitions/VkPhysicalDeviceMultiviewFeatures"},
++        "VkPhysicalDevice16BitStorageFeatures": {"$ref": "#/definitions/VkPhysicalDevice16BitStorageFeatures"},
++        "VkPhysicalDeviceProtectedMemoryFeatures": {"$ref": "#/definitions/VkPhysicalDeviceProtectedMemoryFeatures"},
++        "VkPhysicalDeviceShaderDrawParameterFeatures": {"$ref": "#/definitions/VkPhysicalDeviceShaderDrawParameterFeatures"},
+#endif
 
    private:
     PhysicalDeviceData() = delete;
@@ -891,6 +907,22 @@ bool JsonLoader::LoadFile(const char *filename) {
             ErrorDeprecated(root, "ArrayOfVkLayerProperties");
             ErrorDeprecated(root, "ArrayOfVkExtensionProperties");
             result = true;
+#if 0 // TODO mewmew
+         "VkPhysicalDeviceProperties": {"$ref": "#/definitions/VkPhysicalDeviceProperties"},
++        "VkPhysicalDeviceIDProperties": {"$ref": "#/definitions/VkPhysicalDeviceIDProperties"},
++        "VkPhysicalDeviceMaintenance3Properties": {"$ref": "#/definitions/VkPhysicalDeviceMaintenance3Properties"},
++        "VkPhysicalDeviceMultiviewProperties": {"$ref": "#/definitions/VkPhysicalDeviceMultiviewProperties"},
++        "VkPhysicalDevicePointClippingProperties": {"$ref": "#/definitions/VkPhysicalDevicePointClippingProperties"},
++        "VkPhysicalDeviceProtectedMemoryProperties": {"$ref": "#/definitions/VkPhysicalDeviceProtectedMemoryProperties"},
++        "VkPhysicalDeviceSubgroupProperties": {"$ref": "#/definitions/VkPhysicalDeviceSubgroupProperties"},
+
+         "VkPhysicalDeviceFeatures": {"$ref": "#/definitions/VkPhysicalDeviceFeatures"},
++        "VkPhysicalDeviceVariablePointerFeatures": {"$ref": "#/definitions/VkPhysicalDeviceVariablePointerFeatures"},
++        "VkPhysicalDeviceMultiviewFeatures": {"$ref": "#/definitions/VkPhysicalDeviceMultiviewFeatures"},
++        "VkPhysicalDevice16BitStorageFeatures": {"$ref": "#/definitions/VkPhysicalDevice16BitStorageFeatures"},
++        "VkPhysicalDeviceProtectedMemoryFeatures": {"$ref": "#/definitions/VkPhysicalDeviceProtectedMemoryFeatures"},
++        "VkPhysicalDeviceShaderDrawParameterFeatures": {"$ref": "#/definitions/VkPhysicalDeviceShaderDrawParameterFeatures"},
+#endif
             break;
 
         case SchemaId::kUnknown:
@@ -1073,6 +1105,70 @@ void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkPhysica
     GET_VALUE(residencyNonResidentStrict);
 }
 
+#if 0 // TODO mewmew
+void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkExtent3D *dest) {
+    const Json::Value value = parent[name];
+    if (value.type() != Json::objectValue) {
+        return;
+    }
+    GET_VALUE(width);
+    GET_VALUE(height);
+    GET_VALUE(depth);
+}
+
++        "VkPhysicalDeviceIDProperties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "deviceUUID": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/definitions/uint8_t"}},
++                "driverUUID": {"type": "array", "minItems": 16, "maxItems": 16, "items": {"$ref": "#/definitions/uint8_t"}},
++                "deviceLUID": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"$ref": "#/definitions/uint8_t"}},
++                "deviceNodeMask": {"$ref": "#/definitions/uint32_t"},
++                "deviceLUIDValid": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDeviceMaintenance3Properties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "maxPerSetDescriptors": {"$ref": "#/definitions/uint32_t"},
++                "maxMemoryAllocationSize": {"$ref": "#/definitions/VkDeviceSize"}
++            }
++        },
++        "VkPhysicalDeviceMultiviewProperties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "maxMultiviewViewCount": {"$ref": "#/definitions/uint32_t"},
++                "maxMultiviewInstanceIndex": {"$ref": "#/definitions/uint32_t"}
++            }
++        },
++        "VkPhysicalDevicePointClippingProperties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "pointClippingBehavior": {"$ref": "#/definitions/VkPointClippingBehavior"}
++            }
++        },
++        "VkPhysicalDeviceProtectedMemoryProperties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "protectedNoFault": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDeviceSubgroupProperties": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "subgroupSize": {"$ref": "#/definitions/uint32_t"},
++                "supportedStages": {"$ref": "#/definitions/VkShaderStageFlags"},
++                "supportedOperations": {"$ref": "#/definitions/VkSubgroupFeatureFlags"},
++                "quadOperationsInAllStages": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
+#endif
+
 void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkPhysicalDeviceFeatures *dest) {
     const Json::Value value = parent[name];
     if (value.type() != Json::objectValue) {
@@ -1135,6 +1231,59 @@ void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkPhysica
     GET_VALUE(variableMultisampleRate);
     GET_VALUE(inheritedQueries);
 }
+#if 0 // TODO mewmew
+void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkExtent3D *dest) {
+    const Json::Value value = parent[name];
+    if (value.type() != Json::objectValue) {
+        return;
+    }
+    GET_VALUE(width);
+    GET_VALUE(height);
+    GET_VALUE(depth);
+}
+
++        "VkPhysicalDeviceVariablePointerFeatures": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "variablePointersStorageBuffer": {"$ref": "#/definitions/VkBool32"},
++                "variablePointers": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDeviceMultiviewFeatures": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "multiview": {"$ref": "#/definitions/VkBool32"},
++                "multiviewGeometryShader": {"$ref": "#/definitions/VkBool32"},
++                "multiviewTessellationShader": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDevice16BitStorageFeatures": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "storageBuffer16BitAccess": {"$ref": "#/definitions/VkBool32"},
++                "uniformAndStorageBuffer16BitAccess": {"$ref": "#/definitions/VkBool32"},
++                "storagePushConstant16": {"$ref": "#/definitions/VkBool32"},
++                "storageInputOutput16": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDeviceProtectedMemoryFeatures": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "protectedMemory": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
++        "VkPhysicalDeviceShaderDrawParameterFeatures": {
++            "type": "object",
++            "additionalProperties": false,
++            "properties": {
++                "shaderDrawParameters": {"$ref": "#/definitions/VkBool32"}
++            }
++        },
+#endif
 
 void JsonLoader::GetValue(const Json::Value &parent, const char *name, VkExtent3D *dest) {
     const Json::Value value = parent[name];
