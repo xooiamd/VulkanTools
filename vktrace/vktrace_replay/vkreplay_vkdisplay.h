@@ -64,10 +64,11 @@ class vkDisplayXcb : public vktrace_replay::ReplayDisplayImp {
     xcb_screen_t *m_pXcbScreen;
     xcb_window_t m_XcbWindow;
     xcb_intern_atom_reply_t *atom_wm_delete_window;
-// VkPlatformHandleXcbKHR m_XcbPlatformHandle;
 
     unsigned int m_windowWidth;
     unsigned int m_windowHeight;
+    unsigned int m_screenWidth;
+    unsigned int m_screenHeight;
     std::vector<VkExtent2D> imageExtents;
     std::vector<VkImage> imageHandles;
     std::vector<VkDeviceMemory> imageMemory;
