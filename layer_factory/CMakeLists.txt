@@ -61,7 +61,7 @@ MACRO(SUBDIRLIST result curdir)
   FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
   SET(dirlist "")
   FOREACH(child ${children})
-    IF(IS_DIRECTORY ${curdir}/${child})
+    IF(IS_DIRECTORY ${curdir}/${child} AND NOT (${child} STREQUAL "json"))
       LIST(APPEND dirlist ${child})
     ENDIF()
   ENDFOREACH()
@@ -69,14 +69,38 @@ MACRO(SUBDIRLIST result curdir)
 ENDMACRO()
 
 # Paths for the layer factory json template and the destination for factory layer json files
+set (JSON_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/json/layer_factory.json.in)
 if (WIN32)
-    set (JSON_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/layer_factory_windows.json)
     set (JSON_DEST_PATH ${CMAKE_CURRENT_BINARY_DIR})
     set (JSON_DECORATED_DEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/../layers/$<CONFIGURATION>)
 else()
-    set (JSON_TEMPLATE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/layer_factory_linux.json)
     set (JSON_DEST_PATH ${CMAKE_CURRENT_BINARY_DIR}/../layers)
 endif()
+
+
+# json file creation
+
+# The output file needs Unix "/" separators or Windows "\" separators
+# On top of that, Windows separators actually need to be doubled because the json format uses backslash escapes
+set(TARGET_NAMES VkLayer_assistant_layer VkLayer_demo_layer VkLayer_starter_layer )
+file(TO_NATIVE_PATH "./" RELATIVE_PATH_PREFIX)
+string(REPLACE "\\" "\\\\" RELATIVE_PATH_PREFIX "${RELATIVE_PATH_PREFIX}")
+ # Run each .json.in file through the generator
+# We need to create the generator.cmake script so that the generator can be run at compile time, instead of configure time
+# Running at compile time lets us use cmake generator expressions (TARGET_FILE_NAME and TARGET_FILE_DIR, specifically)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generator.cmake" "configure_file(\"\${INPUT_FILE}\" \"\${OUTPUT_FILE}\")")
+foreach(TARGET_NAME ${TARGET_NAMES})
+    set(CONFIG_DEFINES
+        -DINPUT_FILE=${JSON_TEMPLATE_PATH}
+        -DVK_VERSION=1.1.${vk_header_version}
+    )
+    set(CONFIG_DEFINES ${CONFIG_DEFINES}
+        -DOUTPUT_FILE="$<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json"
+        -DRELATIVE_LAYER_BINARY="${RELATIVE_PATH_PREFIX}$<TARGET_FILE_NAME:${TARGET_NAME}>"
+    )
+    add_custom_target(${TARGET_NAME}-json ALL COMMAND ${CMAKE_COMMAND} ${CONFIG_DEFINES} -P "${CMAKE_CURRENT_BINARY_DIR}/generator.cmake")
+endforeach()
+
 
 if (WIN32)
     macro(add_factory_layer target subdir)
@@ -121,19 +145,29 @@ SUBDIRLIST(ST_SUBDIRS ${CMAKE_LAYER_FACTORY_SOURCE_DIR})
 # Loop through all subdirectories, creating a factory-based layer for each. For each factory layer, create a dependency link on
 # the previous layer in order to serialize their builds.
 set(dep_chain generate_vlf)
+message("@@@0 Starting")
 FOREACH(subdir ${ST_SUBDIRS})
+    message("@@@1" ${subdir})
     file(GLOB INTERCEPTOR_SOURCES ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir}/*.h ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir}/*.cpp)
+    message("@@@2" ${subdir})
     add_factory_layer(${subdir} ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir} layer_factory.cpp layer_factory.h ${INTERCEPTOR_SOURCES})
+    message("@@@3" ${subdir})
     add_dependencies(VkLayer_${subdir} ${dep_chain})
+    message("@@@4" ${subdir})
     set(dep_chain VkLayer_${subdir})
+    message("@@@5" ${subdir})
 ENDFOREACH()
+message("@@@6 All done")
 
 # Add targets for JSON file install. Try to follow the same convention as the Khronos Vulkan-ValidationLayers repository to maintain
 # a coherent directory topology in the install path.
 if(WIN32)
     foreach (factory_layer ${ST_SUBDIRS})
+        message("@@@7" ${factory_layer})
         set(config_file VkLayer_${factory_layer})
+        message("@@@8" ${factory_layer})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${config_file}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        message("@@@9" ${factory_layer})
     endforeach(factory_layer)
 elseif(UNIX)
     foreach (factory_layer ${ST_SUBDIRS})
@@ -150,3 +184,4 @@ elseif(UNIX)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/../layers/staging-json/${config_file}.json DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/vulkan/explicit_layer.d)
     endforeach(factory_layer)
 endif()
+message("@@@10 All done")
