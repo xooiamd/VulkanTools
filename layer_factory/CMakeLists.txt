@@ -92,7 +92,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generator.cmake" "configure_file(\"\${IN
 foreach(TARGET_NAME ${TARGET_NAMES})
     set(CONFIG_DEFINES
         -DINPUT_FILE=${JSON_TEMPLATE_PATH}
-        -DVK_VERSION=1.1.${vk_header_version}
+        -DVK_VERSION="${VulkanHeaders_VERSION_MAJOR}.${VulkanHeaders_VERSION_MINOR}.${VulkanHeaders_VERSION_PATCH}"
     )
     set(CONFIG_DEFINES ${CONFIG_DEFINES}
         -DOUTPUT_FILE="$<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.json"
@@ -145,29 +145,19 @@ SUBDIRLIST(ST_SUBDIRS ${CMAKE_LAYER_FACTORY_SOURCE_DIR})
 # Loop through all subdirectories, creating a factory-based layer for each. For each factory layer, create a dependency link on
 # the previous layer in order to serialize their builds.
 set(dep_chain generate_vlf)
-message("@@@0 Starting")
 FOREACH(subdir ${ST_SUBDIRS})
-    message("@@@1" ${subdir})
     file(GLOB INTERCEPTOR_SOURCES ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir}/*.h ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir}/*.cpp)
-    message("@@@2" ${subdir})
     add_factory_layer(${subdir} ${CMAKE_LAYER_FACTORY_SOURCE_DIR}/${subdir} layer_factory.cpp layer_factory.h ${INTERCEPTOR_SOURCES})
-    message("@@@3" ${subdir})
     add_dependencies(VkLayer_${subdir} ${dep_chain})
-    message("@@@4" ${subdir})
     set(dep_chain VkLayer_${subdir})
-    message("@@@5" ${subdir})
 ENDFOREACH()
-message("@@@6 All done")
 
 # Add targets for JSON file install. Try to follow the same convention as the Khronos Vulkan-ValidationLayers repository to maintain
 # a coherent directory topology in the install path.
 if(WIN32)
     foreach (factory_layer ${ST_SUBDIRS})
-        message("@@@7" ${factory_layer})
         set(config_file VkLayer_${factory_layer})
-        message("@@@8" ${factory_layer})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${config_file}.json DESTINATION ${CMAKE_INSTALL_LIBDIR})
-        message("@@@9" ${factory_layer})
     endforeach(factory_layer)
 elseif(UNIX)
     foreach (factory_layer ${ST_SUBDIRS})
@@ -184,4 +174,3 @@ elseif(UNIX)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/../layers/staging-json/${config_file}.json DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/vulkan/explicit_layer.d)
     endforeach(factory_layer)
 endif()
-message("@@@10 All done")

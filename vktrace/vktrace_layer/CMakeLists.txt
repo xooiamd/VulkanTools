@@ -96,7 +96,7 @@ foreach(TARGET_NAME ${TARGET_NAMES})
         -DGIPA="${GIPA}"
         -DGDPA="${GDPA}"
         -DINPUT_FILE="${CMAKE_CURRENT_SOURCE_DIR}/json/${TARGET_NAME}.json.in"
-        -DVK_VERSION=1.1.${vk_header_version}
+        -DVK_VERSION="${VulkanHeaders_VERSION_MAJOR}.${VulkanHeaders_VERSION_MINOR}.${VulkanHeaders_VERSION_PATCH}"
     )
     set(CONFIG_DEFINES ${CONFIG_DEFINES}
         -DOUTPUT_FILE="${CMAKE_CURRENT_BINARY_DIR}/../../layersvt/${TARGET_NAME}.json"
