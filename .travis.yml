@@ -147,11 +147,15 @@ script:
       echo ===== About to run vlf_test.sh, env is
       env
       echo ===== Contents of /home/travis/build/LunarG/VulkanTools/dbuild/layers
-      ls /home/travis/build/LunarG/VulkanTools/dbuild/layers
-      echo ===== /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
-      ls /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
-      echo ===== /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
-      ls /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
+      ls -l /home/travis/build/LunarG/VulkanTools/dbuild/layers
+      echo ===== Contents of /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
+      ls -l /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
+      echo ===== Contents of /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
+      ls -l /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
+      echo ===== file type of  /home/travis/build/LunarG/VulkanTools/dbuild/layers/libVkLayer_demo_layer.so
+      file /home/travis/build/LunarG/VulkanTools/dbuild/layers/libVkLayer_demo_layer.so
+      echo ===== cat of /home/travis/build/LunarG/VulkanTools/dbuild/layers/VkLayer_demo_layer.json
+      cat /home/travis/build/LunarG/VulkanTools/dbuild/layers/VkLayer_demo_layer.json
       echo ===== End debug section
       dbuild/tests/vlf_test.sh
       # Run apidump_test with mock ICD to ensure apidump layer is working
