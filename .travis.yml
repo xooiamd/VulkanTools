@@ -144,6 +144,9 @@ script:
       export VK_LAYER_PATH=$VK_LAYER_PATH:$VL_BUILD/layers
       export VK_ICD_FILENAMES=$VT_BUILD/icd/VkICD_mock_icd.json
       # Run vlf_test with mock ICD to ensure layer factory is working
+      echo ===== About to run vlf_test.sh, env is
+      env
+      echo =====
       dbuild/tests/vlf_test.sh
       # Run apidump_test with mock ICD to ensure apidump layer is working
       dbuild/tests/apidump_test.sh
