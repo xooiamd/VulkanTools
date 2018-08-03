@@ -146,7 +146,13 @@ script:
       # Run vlf_test with mock ICD to ensure layer factory is working
       echo ===== About to run vlf_test.sh, env is
       env
-      echo =====
+      echo ===== Contents of /home/travis/build/LunarG/VulkanTools/dbuild/layers
+      ls /home/travis/build/LunarG/VulkanTools/dbuild/layers
+      echo ===== /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
+      ls /home/travis/build/LunarG/VulkanTools/dbuild/layersvt
+      echo ===== /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
+      ls /home/travis/build/LunarG/VulkanTools/Vulkan-ValidationLayers/build/layers
+      echo ===== End debug section
       dbuild/tests/vlf_test.sh
       # Run apidump_test with mock ICD to ensure apidump layer is working
       dbuild/tests/apidump_test.sh
